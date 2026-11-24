@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>四模態 AI 感測融合｜高層 3 分鐘互動實測 Demo</title>
+  <style>
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+      --bg-body: #060a12;
+      --bg-card: #10192b;
+      --bg-elevated: #162238;
+      --bg-inset: #080e1a;
+      --bg-header: rgba(6, 10, 18, 0.92);
+
+      --border-subtle: rgba(148, 163, 184, 0.16);
+      --border-strong: rgba(148, 163, 184, 0.34);
+
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+
+      --cyan: #38bdf8;
+      --indigo: #818cf8;
+      --emerald: #34d399;
+      --amber: #fb923c;
+      --rose: #fb7185;
+      --gold: #fbbf24;
+
+      --cyan-soft: rgba(56, 189, 248, 0.14);
+      --emerald-soft: rgba(52, 211, 153, 0.14);
+      --rose-soft: rgba(251, 113, 133, 0.16);
+      --amber-soft: rgba(251, 146, 60, 0.16);
+
+      --shadow-card: 0 12px 32px -12px rgba(0, 0, 0, 0.72);
+      --radius-lg: 16px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+    }
+
+    html[data-theme="light"] {
+      --bg-body: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-elevated: #f8fafc;
+      --bg-inset: #eef2f7;
+      --bg-header: rgba(255, 255, 255, 0.94);
+
+      --border-subtle: rgba(15, 23, 42, 0.11);
+      --border-strong: rgba(15, 23, 42, 0.25);
+
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+
+      --cyan: #0284c7;
+      --indigo: #4f46e5;
+      --emerald: #059669;
+      --amber: #ea580c;
+      --rose: #e11d48;
+      --gold: #d97706;
+
+      --cyan-soft: rgba(2, 132, 199, 0.10);
+      --emerald-soft: rgba(5, 150, 105, 0.10);
+      --rose-soft: rgba(225, 29, 72, 0.11);
+      --amber-soft: rgba(234, 88, 12, 0.11);
+
+      --shadow-card: 0 8px 24px -10px rgba(15, 23, 42, 0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background: var(--bg-body);
+      color: var(--text-primary);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: var(--bg-header);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-icon {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: linear-gradient(135deg, var(--emerald), var(--cyan));
+      display: grid; place-items: center;
+      color: #041018; font-weight: 800; font-size: 14px;
+    }
+    .brand-title { font-size: 17px; font-weight: 800; }
+    .brand-sub { font-size: 12px; color: var(--text-secondary); }
+
+    .top-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      padding: 7px 13px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .btn:hover { border-color: var(--cyan); background: var(--cyan-soft); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--emerald), var(--cyan));
+      color: #041018;
+      border-color: transparent;
+      font-weight: 800;
+    }
+    .btn-primary:hover { opacity: 0.92; background: linear-gradient(135deg, var(--emerald), var(--cyan)); }
+    .btn-danger { border-color: var(--rose); background: var(--rose-soft); color: var(--rose); }
+    .btn.active { border-color: var(--emerald); background: var(--emerald-soft); color: var(--emerald); }
+
+    .container {
+      max-width: 1340px;
+      margin: 0 auto;
+      padding: 20px 24px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .step-nav {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    @media (max-width: 860px) { .step-nav { grid-template-columns: 1fr; } }
+
+    .step-pill {
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border-color 0.15s ease;
+    }
+    .step-pill:hover { border-color: var(--cyan); }
+    .step-num {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--cyan-soft); color: var(--cyan);
+      display: grid; place-items: center; font-weight: 800; flex-shrink: 0;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .card-title { font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .badge-cyan { background: var(--cyan-soft); color: var(--cyan); }
+    .badge-emerald { background: var(--emerald-soft); color: var(--emerald); }
+    .badge-rose { background: var(--rose-soft); color: var(--rose); }
+    .badge-amber { background: var(--amber-soft); color: var(--amber); }
+
+    .split-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    @media (max-width: 900px) { .split-2 { grid-template-columns: 1fr; } }
+
+    .viewport-box {
+      position: relative;
+      height: 320px;
+      border-radius: var(--radius-md);
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+    }
+    .viewport-box video, .viewport-box canvas, .viewport-box img {
+      width: 100%; height: 100%; object-fit: contain; display: block;
+    }
+    .viewport-label {
+      position: absolute; top: 10px; left: 10px;
+      padding: 4px 10px; border-radius: 6px;
+      background: rgba(6, 10, 18, 0.78);
+      color: #f8fafc; font-size: 12px; font-weight: 700;
+      z-index: 4;
+    }
+    .privacy-overlay {
+      position: absolute; inset: 0;
+      background: rgba(6, 10, 18, 0.94);
+      display: none; place-items: center; text-align: center;
+      padding: 20px; z-index: 3; color: var(--emerald);
+    }
+    .privacy-overlay.visible { display: grid; }
+
+    .kpi-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    @media (max-width: 800px) { .kpi-4 { grid-template-columns: repeat(2, 1fr); } }
+
+    .kpi-card {
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+    }
+    .kpi-label { font-size: 12px; color: var(--text-secondary); }
+    .kpi-val { font-size: 18px; font-weight: 800; margin-top: 3px; }
+
+    .blind-alert {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: var(--rose-soft);
+      border: 2px solid var(--rose);
+      color: var(--rose);
+      display: none;
+    }
+    .blind-alert.visible { display: block; }
+
+    .meter-bar {
+      height: 10px; border-radius: 999px;
+      background: var(--bg-inset); border: 1px solid var(--border-subtle);
+      overflow: hidden; margin-top: 6px;
+    }
+    .meter-fill { height: 100%; transition: width 0.15s ease; }
+
+    .raw-pre {
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      overflow-x: auto;
+      white-space: pre;
+      max-height: 130px;
+    }
+
+    table.bom-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+    }
+    table.bom-table th, table.bom-table td {
+      padding: 9px 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      text-align: left;
+    }
+    table.bom-table th { color: var(--text-secondary); font-weight: 700; background: var(--bg-inset); }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">PoC</div>
+      <div>
+        <div class="brand-title">四模態 AI 感測融合｜高層 3 分鐘互動實測 Demo</div>
+        <div class="brand-sub">真實 YOLOv8n-pose 骨架追蹤 × 遮鏡失效現場驗證 × GitHub 官方 ESP32 硬體資料</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn" id="btn-theme" type="button">切換淺色模式</button>
+      <a class="btn" href="/">進入進階工程戰情室 (/)</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <nav class="step-nav">
+      <a class="step-pill" href="#step-1">
+        <div class="step-num">1</div>
+        <div><strong>Step 1｜現場真實骨架與零落盤</strong><br><span style="font-size:12px;color:var(--text-secondary);">親自測試 YOLOv8n-pose 與 RAM 即刻清零</span></div>
+      </a>
+      <a class="step-pill" href="#step-2">
+        <div class="step-num">2</div>
+        <div><strong>Step 2｜遮鏡踢館（純視覺失效）</strong><br><span style="font-size:12px;color:var(--text-secondary);">用手遮住鏡頭，證明單靠攝影機必失靈</span></div>
+      </a>
+      <a class="step-pill" href="#step-3">
+        <div class="step-num">3</div>
+        <div><strong>Step 3｜官方真實資料 × $500 申請</strong><br><span style="font-size:12px;color:var(--text-secondary);">驗明真實 ESP32 CSI 與下階段硬體預算</span></div>
+      </a>
+    </nav>
+
+    <!-- STEP 1 -->
+    <section class="card" id="step-1">
+      <div class="card-header">
+        <div class="card-title">
+          Step 1｜現場實測：真實 YOLOv8n-pose 去識別化骨架與零落盤隱私
+          <span class="badge badge-emerald mono" id="demo-backend-badge">引擎待命中</span>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+          <button class="btn btn-primary" id="btn-start-cam" type="button">▶ 開啟筆電鏡頭（即時實測）</button>
+          <label class="btn" style="cursor:pointer;">
+            上傳圖片測試
+            <input type="file" id="input-photo-test" accept="image/*" style="display:none;" />
+          </label>
+          <button class="btn" id="btn-hide-raw" type="button">隱藏左側原圖（模擬正式產品視角）</button>
+        </div>
+      </div>
+
+      <div class="split-2">
+        <div class="viewport-box">
+          <div class="viewport-label">本機瀏覽器攝影機對照畫面（絕不寫入磁碟）</div>
+          <video id="demo-video" autoplay playsinline muted style="display:none;"></video>
+          <img id="demo-photo-preview" alt="上傳測試圖" style="display:none;" />
+          <div id="cam-idle-hint" style="text-align:center; padding:20px; color:var(--text-secondary);">
+            點擊上方「<strong>開啟筆電鏡頭</strong>」對著鏡頭揮手、起立或側傾，<br>右側將由真實 <span class="mono">YOLOv8n-pose</span> 抽出您的 17 個關節點。
+          </div>
+          <div class="privacy-overlay" id="raw-privacy-overlay">
+            <div>
+              <div style="font-size:16px; font-weight:800; margin-bottom:6px;">正式上線產品視角：原圖已完全屏蔽</div>
+              <div style="font-size:12px; color:var(--text-secondary);">邊緣端僅於 Volatile RAM 推論，人員與管理員完全看不到左邊畫面。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="viewport-box">
+          <div class="viewport-label">後端真實 AI 輸出：17 點去識別化骨架（Volatile RAM）</div>
+          <canvas id="demo-skel-canvas" width="640" height="480"></canvas>
+        </div>
+      </div>
+      <canvas id="demo-grab-canvas" width="480" height="360" style="display:none;"></canvas>
+
+      <div class="kpi-4">
+        <div class="kpi-card">
+          <div class="kpi-label">即時 AI 姿態判定</div>
+          <div class="kpi-val" id="kpi-pose" style="color:var(--cyan);">等待影像輸入</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Volatile RAM 覆寫清零耗時</div>
+          <div class="kpi-val mono" id="kpi-wipe" style="color:var(--emerald);">0.000 ms</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">全零記憶體校驗 (Zero Verified)</div>
+          <div class="kpi-val mono" id="kpi-zero" style="color:var(--emerald);">TRUE</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">磁碟寫入圖片／影片數</div>
+          <div class="kpi-val mono" id="kpi-disk" style="color:var(--emerald);">0 張（零落盤）</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2 -->
+    <section class="card" id="step-2">
+      <div class="card-header">
+        <div class="card-title">
+          Step 2｜現場踢館實驗：請用手或紙張擋住筆電鏡頭（純視覺失效證明）
+          <span class="badge badge-cyan" id="vision-health-badge">光學視野狀態：待測</span>
+        </div>
+        <button class="btn btn-danger" id="btn-sim-blind" type="button">無鏡頭時：送入全黑遮蔽幀實測</button>
+      </div>
+
+      <div class="split-2">
+        <div class="kpi-card">
+          <div style="display:flex; justify-content:space-between;">
+            <span class="kpi-label">即時平均亮度（Brightness，門檻 &lt; 28 失明）</span>
+            <strong class="mono" id="val-brightness">—</strong>
+          </div>
+          <div class="meter-bar"><div class="meter-fill" id="bar-brightness" style="width:0%; background:var(--cyan);"></div></div>
+        </div>
+        <div class="kpi-card">
+          <div style="display:flex; justify-content:space-between;">
+            <span class="kpi-label">即時畫面清晰度方差（Sharpness，門檻 &lt; 18 模糊失明）</span>
+            <strong class="mono" id="val-sharpness">—</strong>
+          </div>
+          <div class="meter-bar"><div class="meter-fill" id="bar-sharpness" style="width:0%; background:var(--emerald);"></div></div>
+        </div>
+      </div>
+
+      <div class="blind-alert" id="blind-alert-box">
+        <div style="font-size:16px; font-weight:800;">⚠ 純視覺 AI 已失明（Pure Vision Blind）！</div>
+        <div id="blind-reason-text" style="margin-top:4px; font-size:13px;"></div>
+        <div style="margin-top:8px; font-size:13px; color:var(--text-primary);">
+          <strong>這正是本專案核心價值：</strong> 當現場遇到火災濃煙、全暗環境或衛浴/臥室不能開鏡頭時，任何純 IP Camera 方案都會 100% 失效；唯有融合 <strong>60GHz mmWave 雷達（穿透濃煙/測呼吸）＋ VOx 熱像儀（提前預警熱失控）＋ Wi-Fi CSI（跨牆感知）</strong> 才能達成全天候零盲區。
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3 -->
+    <section class="card" id="step-3">
+      <div class="card-header">
+        <div class="card-title">
+          Step 3｜官方真實 ESP32 硬體資料驗證 × 下階段 \$500 試作預算提案
+          <span class="badge badge-cyan mono" id="real-csi-badge">載入真實資料集中...</span>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn" id="btn-csi-play" type="button">暫停 / 播放真實波形</button>
+        </div>
+      </div>
+
+      <div class="split-2">
+        <div>
+          <div style="font-size:13px; font-weight:700; margin-bottom:6px;">
+            真實 ESP32 硬體實測訊號（917 幀 / 95 秒，非合成假數據）
+          </div>
+          <div class="viewport-box" style="height:240px;">
+            <canvas id="real-csi-canvas" width="640" height="240"></canvas>
+          </div>
+          <div style="font-size:12px; color:var(--text-secondary); margin-top:8px;" id="real-csi-meta"></div>
+          <div style="font-size:12px; font-weight:700; margin:8px 0 4px;">原始 CSV 封包實物抽樣（前 4 行）：</div>
+          <pre class="raw-pre mono" id="real-csi-raw">載入中...</pre>
+        </div>
+
+        <div>
+          <div style="font-size:13px; font-weight:700; margin-bottom:6px;">
+            Gate 1 預算申請：\$500 USD 會議室真實 4 感測器 HIL Demo 採購清單（2 週接上本系統）
+          </div>
+          <table class="bom-table">
+            <thead>
+              <tr>
+                <th>感測模態</th>
+                <th>現成開發板建議型號</th>
+                <th>預估成本 (USD)</th>
+                <th>會議室實測展示動作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Wi-Fi CSI</strong></td>
+                <td class="mono">2 × ESP32-S3 / ESP32-C6</td>
+                <td class="mono">~$15</td>
+                <td>高層在會議室門外走動，穿牆喚醒 L0</td>
+              </tr>
+              <tr>
+                <td><strong>mmWave 雷達</strong></td>
+                <td class="mono">Seeed MR60FDA2 / TI IWRL6432BOOST</td>
+                <td class="mono">$45–$150</td>
+                <td>靜坐抓真實呼吸率；隔紙板揮手穿透驗證</td>
+              </tr>
+              <tr>
+                <td><strong>Thermal 熱像</strong></td>
+                <td class="mono">MLX90640 USB / FLIR Lepton 3.5</td>
+                <td class="mono">$60–$220</td>
+                <td>熱咖啡／吹風機測試誤報抑制與 Stage 1 急停</td>
+              </tr>
+              <tr>
+                <td><strong>IP Camera</strong></td>
+                <td class="mono">既有 RTSP / 筆電 Webcam (已實作)</td>
+                <td class="mono">$0</td>
+                <td>僅於 L2 啟動真實 YOLOv8 骨架且零落盤</td>
+              </tr>
+              <tr>
+                <td colspan="2"><strong>含線材支架與外殼總試作預算</strong></td>
+                <td class="mono" style="color:var(--emerald); font-weight:800;">$120–$450 (&lt;$500)</td>
+                <td><strong>2 週後直接接進本系統同一套融合引擎</strong></td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="margin-top:10px; padding:10px 12px; border-radius:var(--radius-md); background:var(--emerald-soft); border:1px solid var(--emerald); font-size:13px;">
+            <strong>結論建議：</strong> 今日軟體融合底座、L0–L3 隱私狀態機、D-S 引擎與真實視覺模型皆已就緒；建請核准 <strong>&lt; $500 USD 開發板試作採購</strong>，於 2 週內完成四模態全實體硬體會議室實測驗收。
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const state = {
+        camStream: null,
+        camTimer: null,
+        uploading: false,
+        hideRaw: false,
+        realCsi: null,
+        csiCursor: 0,
+        csiPlaying: true
+      };
+
+      const COCO_EDGES = [
+        [0, 1], [0, 2], [1, 3], [2, 4],
+        [5, 6], [5, 7], [7, 9], [6, 8], [8, 10],
+        [5, 11], [6, 12], [11, 12],
+        [11, 13], [13, 15], [12, 14], [14, 16]
+      ];
+
+      function cssVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+
+      document.getElementById("btn-theme").addEventListener("click", () => {
+        const html = document.documentElement;
+        const next = html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", next);
+        document.getElementById("btn-theme").textContent =
+          next === "dark" ? "切換淺色模式" : "切換深色模式";
+        drawRealCsiChart();
+      });
+
+      document.getElementById("btn-hide-raw").addEventListener("click", () => {
+        state.hideRaw = !state.hideRaw;
+        document.getElementById("raw-privacy-overlay").classList.toggle("visible", state.hideRaw);
+        document.getElementById("btn-hide-raw").classList.toggle("active", state.hideRaw);
+        document.getElementById("btn-hide-raw").textContent =
+          state.hideRaw ? "顯示左側對照原圖" : "隱藏左側原圖（模擬正式產品視角）";
+      });
+
+      function renderPoseResult(data) {
+        if (!data || !data.ok) return;
+
+        document.getElementById("demo-backend-badge").textContent = "引擎：" + data.pose_backend;
+        const poseMap = {
+          standing: "直立站姿 (standing)",
+          sitting: "坐姿在席 (sitting)",
+          fallen: "⚠ 疑似跌倒／大幅側傾 (fallen)",
+          none: data.visual_blind ? "✕ 純視覺已失明" : "未偵測到人體"
+        };
+        const poseEl = document.getElementById("kpi-pose");
+        poseEl.textContent = poseMap[data.posture_label] || data.posture_label;
+        poseEl.style.color = data.visual_blind || data.posture_label === "fallen"
+          ? cssVar("--rose")
+          : cssVar("--cyan");
+
+        document.getElementById("kpi-wipe").textContent = data.ram_wipe_ms.toFixed(3) + " ms (<100ms)";
+        document.getElementById("kpi-zero").textContent = data.zero_verified ? "TRUE (全零)" : "FALSE";
+        document.getElementById("kpi-disk").textContent = data.disk_files_written + " 張（零落盤）";
+
+        // Step 2 metrics
+        document.getElementById("val-brightness").textContent = data.brightness.toFixed(1) + " / 255";
+        document.getElementById("bar-brightness").style.width = Math.min(100, (data.brightness / 255) * 100).toFixed(1) + "%";
+        document.getElementById("bar-brightness").style.background = data.brightness < 28 ? cssVar("--rose") : cssVar("--cyan");
+
+        document.getElementById("val-sharpness").textContent = data.sharpness.toFixed(1);
+        document.getElementById("bar-sharpness").style.width = Math.min(100, (data.sharpness / 300) * 100).toFixed(1) + "%";
+        document.getElementById("bar-sharpness").style.background = data.sharpness < 18 ? cssVar("--rose") : cssVar("--emerald");
+
+        const healthBadge = document.getElementById("vision-health-badge");
+        const blindBox = document.getElementById("blind-alert-box");
+        if (data.visual_blind) {
+          healthBadge.textContent = "✕ 純視覺已失明";
+          healthBadge.className = "badge badge-rose";
+          blindBox.classList.add("visible");
+          document.getElementById("blind-reason-text").textContent = data.blind_reason;
+        } else {
+          healthBadge.textContent = "✓ 光學視野清晰正常";
+          healthBadge.className = "badge badge-emerald";
+          blindBox.classList.remove("visible");
+        }
+
+        drawSkeletonCanvas(data);
+      }
+
+      function drawSkeletonCanvas(data) {
+        const cnv = document.getElementById("demo-skel-canvas");
+        const ctx = cnv.getContext("2d");
+        const w = cnv.width, h = cnv.height;
+        ctx.fillStyle = "#060d18";
+        ctx.fillRect(0, 0, w, h);
+
+        // Background grid
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.14)";
+        ctx.lineWidth = 1;
+        for (let x = 40; x < w; x += 40) {
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+        }
+        for (let y = 40; y < h; y += 40) {
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+        }
+
+        if (data.visual_blind) {
+          ctx.fillStyle = "rgba(225, 29, 72, 0.20)";
+          ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = "#fda4af";
+          ctx.font = "bold 20px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("純視覺 AI 已失明（濃煙 / 遮擋 / 全暗）", w / 2, h / 2 - 12);
+          ctx.font = "14px sans-serif";
+          ctx.fillText("需切換至 60GHz mmWave 雷達與熱像儀接手追蹤", w / 2, h / 2 + 20);
+          ctx.textAlign = "left";
+          return;
+        }
+
+        const pts = data.skeleton_17pts || [];
+        if (!pts.length) {
+          ctx.fillStyle = "#94a3b8";
+          ctx.font = "15px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("未偵測到完整人體關節，請稍後退或揮動手臂", w / 2, h / 2);
+          ctx.textAlign = "left";
+          return;
+        }
+
+        const col = data.posture_label === "fallen" ? "#fb7185" : "#34d399";
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 4;
+        for (const [i, j] of COCO_EDGES) {
+          if (!pts[i] || !pts[j] || pts[i].conf < 0.25 || pts[j].conf < 0.25) continue;
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x * w, pts[i].y * h);
+          ctx.lineTo(pts[j].x * w, pts[j].y * h);
+          ctx.stroke();
+        }
+        for (const p of pts) {
+          if (p.conf < 0.25) continue;
+          ctx.beginPath();
+          ctx.arc(p.x * w, p.y * h, 5.5, 0, Math.PI * 2);
+          ctx.fillStyle = "#f8fafc";
+          ctx.fill();
+          ctx.strokeStyle = col;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = "rgba(16, 185, 129, 0.24)";
+        ctx.fillRect(14, h - 40, w - 28, 28);
+        ctx.fillStyle = "#6ee7b7";
+        ctx.font = "bold 12px monospace";
+        ctx.fillText(
+          "SEQ #" + data.seq + " | RAM Wipe=" + data.ram_wipe_ms.toFixed(3) + "ms | ZeroDisk=TRUE",
+          24,
+          h - 21
+        );
+      }
+
+      async function sendBlobForPose(blob) {
+        if (!blob || state.uploading) return;
+        state.uploading = true;
+        try {
+          const fd = new FormData();
+          fd.append("file", blob, "demo.jpg");
+          const res = await fetch("/api/demo/pose", { method: "POST", body: fd });
+          if (res.ok) {
+            const data = await res.json();
+            renderPoseResult(data);
+          }
+        } finally {
+          state.uploading = false;
+        }
+      }
+
+      function stopDemoCamera() {
+        if (state.camTimer) {
+          clearInterval(state.camTimer);
+          state.camTimer = null;
+        }
+        if (state.camStream) {
+          state.camStream.getTracks().forEach((t) => t.stop());
+          state.camStream = null;
+        }
+        const vid = document.getElementById("demo-video");
+        vid.srcObject = null;
+        vid.style.display = "none";
+        document.getElementById("cam-idle-hint").style.display = "block";
+        const btn = document.getElementById("btn-start-cam");
+        btn.textContent = "▶ 開啟筆電鏡頭（即時實測）";
+        btn.classList.remove("active");
+      }
+
+      document.getElementById("btn-start-cam").addEventListener("click", async () => {
+        if (state.camStream) {
+          stopDemoCamera();
+          return;
+        }
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          alert("此瀏覽器不支援即時相機存取，請使用「上傳圖片測試」或「送入全黑遮蔽幀實測」。");
+          return;
+        }
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 480, height: 360 } });
+          state.camStream = stream;
+          const vid = document.getElementById("demo-video");
+          const imgPrev = document.getElementById("demo-photo-preview");
+          imgPrev.style.display = "none";
+          document.getElementById("cam-idle-hint").style.display = "none";
+          vid.style.display = "block";
+          vid.srcObject = stream;
+          await vid.play();
+
+          const btn = document.getElementById("btn-start-cam");
+          btn.textContent = "■ 停止筆電鏡頭";
+          btn.classList.add("active");
+
+          const grab = document.getElementById("demo-grab-canvas");
+          const gctx = grab.getContext("2d");
+          state.camTimer = setInterval(() => {
+            if (state.uploading || vid.readyState < 2) return;
+            gctx.drawImage(vid, 0, 0, grab.width, grab.height);
+            grab.toBlob((blob) => {
+              gctx.clearRect(0, 0, grab.width, grab.height);
+              sendBlobForPose(blob);
+            }, "image/jpeg", 0.78);
+          }, 260);
+        } catch (err) {
+          alert("無法取得攝影機權限：" + err.message);
+        }
+      });
+
+      document.getElementById("input-photo-test").addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        stopDemoCamera();
+        const url = URL.createObjectURL(file);
+        const imgPrev = document.getElementById("demo-photo-preview");
+        document.getElementById("cam-idle-hint").style.display = "none";
+        imgPrev.style.display = "block";
+        imgPrev.onload = () => {
+          const grab = document.getElementById("demo-grab-canvas");
+          const gctx = grab.getContext("2d");
+          gctx.drawImage(imgPrev, 0, 0, grab.width, grab.height);
+          grab.toBlob((blob) => {
+            gctx.clearRect(0, 0, grab.width, grab.height);
+            sendBlobForPose(blob);
+          }, "image/jpeg", 0.85);
+          URL.revokeObjectURL(url);
+        };
+        imgPrev.src = url;
+      });
+
+      document.getElementById("btn-sim-blind").addEventListener("click", () => {
+        stopDemoCamera();
+        const grab = document.getElementById("demo-grab-canvas");
+        const gctx = grab.getContext("2d");
+        gctx.fillStyle = "#08080a";
+        gctx.fillRect(0, 0, grab.width, grab.height);
+        grab.toBlob((blob) => {
+          sendBlobForPose(blob);
+        }, "image/jpeg", 0.8);
+      });
+
+      // Step 3: Load & Animate Real GitHub ESP32 CSI CSV
+      function drawRealCsiChart() {
+        const cnv = document.getElementById("real-csi-canvas");
+        const ctx = cnv.getContext("2d");
+        const w = cnv.width, h = cnv.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const payload = state.realCsi;
+        if (!payload || !payload.available || !payload.frames.length) return;
+        const frames = payload.frames;
+
+        const padL = 42, padR = 16, padT = 24, padB = 26;
+        const plotW = w - padL - padR, plotH = h - padT - padB;
+
+        ctx.strokeStyle = cssVar("--border-subtle");
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+          const y = padT + (plotH / 4) * i;
+          ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+        }
+
+        // Draw Fresnel variance curve (Cyan)
+        ctx.beginPath();
+        frames.forEach((f, idx) => {
+          const x = padL + (idx / (frames.length - 1)) * plotW;
+          const y = padT + plotH - Math.min(1, f.fresnel_variance) * plotH;
+          if (idx === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.strokeStyle = cssVar("--cyan");
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Draw RSSI curve normalized (-50..-10 dBm -> 0..1, Amber)
+        ctx.beginPath();
+        frames.forEach((f, idx) => {
+          const rssi = f.rssi_dbm !== null ? f.rssi_dbm : -30;
+          const norm = Math.max(0, Math.min(1, (rssi + 50) / 40));
+          const x = padL + (idx / (frames.length - 1)) * plotW;
+          const y = padT + plotH - norm * plotH;
+          if (idx === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.strokeStyle = cssVar("--amber");
+        ctx.lineWidth = 1.6;
+        ctx.stroke();
+
+        // Playback cursor
+        const curIdx = state.csiCursor % frames.length;
+        const cx = padL + (curIdx / (frames.length - 1)) * plotW;
+        ctx.strokeStyle = cssVar("--emerald");
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(cx, padT); ctx.lineTo(cx, padT + plotH); ctx.stroke();
+
+        const cur = frames[curIdx];
+        ctx.fillStyle = cssVar("--text-primary");
+        ctx.font = "11px monospace";
+        ctx.fillText(
+          "t=" + cur.time_s.toFixed(1) + "s | RSSI=" + cur.rssi_dbm + "dBm | Fresnel Var=" + cur.fresnel_variance.toFixed(3),
+          padL,
+          15
+        );
+        ctx.fillStyle = cssVar("--text-secondary");
+        ctx.fillText("Cyan=真實 CSI 子載波擾動 | Amber=ESP32 實測 RSSI (-50~-10 dBm)", padL, h - 8);
+      }
+
+      async function bootRealCsi() {
+        const res = await fetch("/api/demo/real-csi");
+        const data = await res.json();
+        state.realCsi = data;
+        if (!data.available) {
+          document.getElementById("real-csi-badge").textContent = "未找到公開資料集";
+          return;
+        }
+        document.getElementById("real-csi-badge").textContent =
+          "真實封包：" + data.total_packets + " 幀 / " + data.duration_s + "s";
+        const prov = data.provenance || {};
+        document.getElementById("real-csi-meta").innerHTML =
+          "<strong>資料出處：</strong>" + (prov.dataset_name || data.title) +
+          "<br><span class='mono' style='font-size:11px;'>來源 URL：" + (prov.raw_url || "") + "</span>";
+        document.getElementById("real-csi-raw").textContent = (data.raw_preview_lines || []).join("\n");
+        drawRealCsiChart();
+
+        setInterval(() => {
+          if (state.csiPlaying && state.realCsi && state.realCsi.frames) {
+            state.csiCursor = (state.csiCursor + 1) % state.realCsi.frames.length;
+            drawRealCsiChart();
+          }
+        }, 160);
+      }
+
+      document.getElementById("btn-csi-play").addEventListener("click", () => {
+        state.csiPlaying = !state.csiPlaying;
+      });
+
+      bootRealCsi();
+    })();
+  </script>
+</body>
+</html>

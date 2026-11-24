@@ -1,0 +1,10 @@
+{
+  "dataset_name": "HKU AIoT Lab ESP32-CSI 實測實驗資料集 (基於 Espressif ESP-CSI 格式)",
+  "repo": "https://github.com/aiot-lab/HKU-COMP3516-ESP32-CSI-Tool",
+  "raw_url": "https://raw.githubusercontent.com/aiot-lab/HKU-COMP3516-ESP32-CSI-Tool/master/active_sta/data/my-experiment-file.csv",
+  "espressif_reference": "https://github.com/espressif/esp-csi",
+  "local_file": "d:\\AI_sensor_fusion\\system_design\\python_poc\\datasets\\real_public\\espressif_esp_csi_real.csv",
+  "total_lines": 918,
+  "bytes": 414074,
+  "downloaded_at": "2026-11-22T13:59:41.432951+00:00"
+}

@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ultralytics/
+system_design/cpp_edge_core/build/
+system_design/python_poc/datasets/uploaded/
+*.log

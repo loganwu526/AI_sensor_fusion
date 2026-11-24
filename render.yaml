@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: ai-sensor-fusion-poc
+    runtime: docker
+    plan: free
+    rootDir: system_design/python_poc
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"

@@ -1,0 +1,2091 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>四模態 AI 感測融合｜Privacy-by-Design 即時監控戰情室</title>
+  <style>
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+      --bg-body: #060a12;
+      --bg-grad-1: rgba(14, 165, 233, 0.12);
+      --bg-grad-2: rgba(16, 185, 129, 0.09);
+      --bg-surface: #0c1322;
+      --bg-card: #10192b;
+      --bg-elevated: #162238;
+      --bg-inset: #080e1a;
+      --bg-header: rgba(6, 10, 18, 0.90);
+
+      --border-subtle: rgba(148, 163, 184, 0.15);
+      --border-strong: rgba(148, 163, 184, 0.30);
+
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+
+      --cyan: #38bdf8;
+      --indigo: #818cf8;
+      --emerald: #34d399;
+      --amber: #fb923c;
+      --rose: #fb7185;
+      --gold: #fbbf24;
+
+      --cyan-soft: rgba(56, 189, 248, 0.14);
+      --indigo-soft: rgba(129, 140, 248, 0.14);
+      --emerald-soft: rgba(52, 211, 153, 0.14);
+      --amber-soft: rgba(251, 146, 60, 0.16);
+      --rose-soft: rgba(251, 113, 133, 0.15);
+      --gold-soft: rgba(251, 191, 36, 0.15);
+
+      --shadow-card: 0 10px 30px -12px rgba(0, 0, 0, 0.70);
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+    }
+
+    html[data-theme="light"] {
+      --bg-body: #f1f5f9;
+      --bg-grad-1: rgba(2, 132, 199, 0.08);
+      --bg-grad-2: rgba(5, 150, 105, 0.07);
+      --bg-surface: #ffffff;
+      --bg-card: #ffffff;
+      --bg-elevated: #f8fafc;
+      --bg-inset: #eef2f7;
+      --bg-header: rgba(255, 255, 255, 0.92);
+
+      --border-subtle: rgba(15, 23, 42, 0.11);
+      --border-strong: rgba(15, 23, 42, 0.24);
+
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+
+      --cyan: #0284c7;
+      --indigo: #4f46e5;
+      --emerald: #059669;
+      --amber: #ea580c;
+      --rose: #e11d48;
+      --gold: #d97706;
+
+      --cyan-soft: rgba(2, 132, 199, 0.10);
+      --indigo-soft: rgba(79, 70, 229, 0.10);
+      --emerald-soft: rgba(5, 150, 105, 0.10);
+      --amber-soft: rgba(234, 88, 12, 0.11);
+      --rose-soft: rgba(225, 29, 72, 0.11);
+      --gold-soft: rgba(217, 119, 6, 0.11);
+
+      --shadow-card: 0 8px 24px -10px rgba(15, 23, 42, 0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background-color: var(--bg-body);
+      background-image:
+        radial-gradient(circle at 10% 6%, var(--bg-grad-1), transparent 40%),
+        radial-gradient(circle at 90% 10%, var(--bg-grad-2), transparent 40%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg-header);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--cyan), var(--emerald));
+      display: grid;
+      place-items: center;
+      color: #041018;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .top-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 8px var(--emerald);
+    }
+
+    .dot.offline {
+      background: var(--rose);
+      box-shadow: 0 0 8px var(--rose);
+    }
+
+    .btn {
+      appearance: none;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      padding: 6px 11px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+
+    .btn:hover {
+      border-color: var(--cyan);
+      background: var(--cyan-soft);
+    }
+
+    .btn.active {
+      border-color: var(--cyan);
+      background: var(--cyan-soft);
+      color: var(--cyan);
+    }
+
+    .btn-normal.active, .btn-normal:hover {
+      border-color: var(--emerald);
+      background: var(--emerald-soft);
+      color: var(--emerald);
+    }
+
+    .btn-danger.active, .btn-danger:hover {
+      border-color: var(--rose);
+      background: var(--rose-soft);
+      color: var(--rose);
+    }
+
+    .btn-noise.active, .btn-noise:hover {
+      border-color: var(--gold);
+      background: var(--gold-soft);
+      color: var(--gold);
+    }
+
+    .btn-amber.active {
+      border-color: var(--amber);
+      background: var(--amber-soft);
+      color: var(--amber);
+    }
+
+    .container {
+      max-width: 1620px;
+      margin: 0 auto;
+      padding: 16px 20px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .badge-cyan { background: var(--cyan-soft); color: var(--cyan); border-color: rgba(56,189,248,0.28); }
+    .badge-emerald { background: var(--emerald-soft); color: var(--emerald); border-color: rgba(52,211,153,0.28); }
+    .badge-amber { background: var(--amber-soft); color: var(--amber); border-color: rgba(251,146,60,0.35); }
+    .badge-rose { background: var(--rose-soft); color: var(--rose); border-color: rgba(251,113,133,0.35); }
+    .badge-indigo { background: var(--indigo-soft); color: var(--indigo); border-color: rgba(129,140,248,0.30); }
+    .badge-gold { background: var(--gold-soft); color: var(--gold); border-color: rgba(251,191,36,0.32); }
+
+    /* Control Deck */
+    .control-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1.1fr 1.6fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 1200px) {
+      .control-grid { grid-template-columns: 1fr; }
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .sub-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 6px;
+      margin-top: 8px;
+    }
+
+    .sub-label:first-child { margin-top: 0; }
+
+    .hw-meta {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 4px 12px;
+    }
+
+    /* State Machine Bar */
+    .fsm-strip {
+      display: grid;
+      grid-template-columns: 2.2fr 1.2fr 1.4fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    @media (max-width: 1200px) {
+      .fsm-strip { grid-template-columns: 1fr; }
+    }
+
+    .l-stages {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .l-stages { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .l-node {
+      padding: 10px;
+      border-radius: var(--radius-md);
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      opacity: 0.55;
+      transition: all 0.2s ease;
+    }
+
+    .l-node.active {
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+
+    .l-node.active.L0 { border-color: var(--emerald); background: var(--emerald-soft); }
+    .l-node.active.L1 { border-color: var(--cyan); background: var(--cyan-soft); }
+    .l-node.active.L2 { border-color: var(--amber); background: var(--amber-soft); }
+    .l-node.active.L3 { border-color: var(--rose); background: var(--rose-soft); box-shadow: 0 0 18px rgba(251, 113, 133, 0.25); }
+
+    .l-code { font-size: 15px; font-weight: 800; }
+    .l-name { font-size: 12px; font-weight: 700; margin-top: 2px; }
+    .l-desc { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--cyan), var(--emerald));
+      transition: width 0.2s ease;
+    }
+
+    .auth-box {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .input {
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      padding: 5px 8px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      width: 110px;
+    }
+
+    /* 4 Sensor Canvases */
+    .sensor-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    @media (max-width: 1024px) {
+      .sensor-grid { grid-template-columns: 1fr; }
+    }
+
+    .canvas-wrap {
+      position: relative;
+      width: 100%;
+      height: 240px;
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    canvas.sensor-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .sensor-footer {
+      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    /* D-S Fusion + Scenario Eval */
+    .mid-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1.1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 1100px) {
+      .mid-grid { grid-template-columns: 1fr; }
+    }
+
+    .bpa-row {
+      margin-bottom: 10px;
+    }
+
+    .bpa-label-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+
+    .bpa-bar {
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .seg-normal { background: var(--emerald); transition: width 0.2s ease; }
+    .seg-alert { background: var(--rose); transition: width 0.2s ease; }
+    .seg-unc { background: #64748b; transition: width 0.2s ease; }
+
+    .kpi-mini-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 680px) {
+      .kpi-mini-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .kpi-box {
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .kpi-label { font-size: 11px; color: var(--text-secondary); }
+    .kpi-val { font-size: 16px; font-weight: 800; margin-top: 2px; }
+
+    .reason-list {
+      margin: 6px 0;
+      padding-left: 18px;
+      font-size: 12px;
+      color: var(--text-primary);
+    }
+
+    .cmd-box {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: var(--radius-md);
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      font-size: 12px;
+    }
+
+    /* Telemetry & Audit */
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.35fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 1100px) {
+      .bottom-grid { grid-template-columns: 1fr; }
+    }
+
+    .latency-stack {
+      height: 14px;
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      margin: 6px 0;
+    }
+
+    .audit-table-wrap {
+      max-height: 290px;
+      overflow-y: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--bg-inset);
+    }
+
+    table.audit-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    table.audit-table th, table.audit-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    table.audit-table th {
+      position: sticky;
+      top: 0;
+      background: var(--bg-elevated);
+      font-weight: 700;
+      color: var(--text-secondary);
+      z-index: 2;
+    }
+
+    .degrade-banner {
+      padding: 8px 12px;
+      border-radius: var(--radius-md);
+      background: var(--amber-soft);
+      border: 1px solid var(--amber);
+      color: var(--amber);
+      font-weight: 700;
+      font-size: 12px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .degrade-banner.visible { display: flex; }
+
+    /* Hybrid Live & Log-Replay Executive Deck */
+    .poc-grid {
+      display: grid;
+      grid-template-columns: 1.05fr 1.35fr 1.15fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 1200px) {
+      .poc-grid { grid-template-columns: 1fr; }
+    }
+
+    .poc-box {
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .select-input {
+      background: var(--bg-card);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      border-radius: var(--radius-sm);
+      padding: 6px 8px;
+      font-size: 12px;
+      font-family: inherit;
+      width: 100%;
+    }
+
+    .range-slider {
+      width: 100%;
+      accent-color: var(--cyan);
+      cursor: pointer;
+    }
+
+    .eval-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 960px) {
+      .eval-summary-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">4M</div>
+      <div>
+        <div class="brand-title">四模態 AI 感測融合｜Privacy-by-Design 即時監控戰情室</div>
+        <div class="brand-sub">802.11bf CSI / BLE / UWB ＋ 60/77GHz mmWave ＋ VOx Thermal ＋ Edge RGB (Volatile RAM)</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <a class="btn btn-normal" href="/demo" style="text-decoration:none;">★ 高層 3 分鐘互動簡報 (/demo)</a>
+      <span class="pill" id="ws-pill">
+        <span class="dot" id="ws-dot"></span>
+        <span id="ws-status-text">連線中...</span>
+      </span>
+      <span class="pill mono" id="sim-clock">模擬時間 0.0s</span>
+      <button class="btn" id="btn-pause-stream" type="button">暫停推送</button>
+      <button class="btn" id="btn-stress-toggle" type="button">模擬 NPU 滿載降級</button>
+      <button class="btn" id="btn-theme-toggle" type="button">切換淺色模式</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="degrade-banner" id="degrade-banner">
+      <span>⚠ Graceful Degradation 啟動中：NPU 負載突破閾值，系統已自動將 RGB 降載至 10 fps，優先鎖定 20 Hz mmWave 雷達與熱像追蹤（確保延遲 &lt; 500 ms）</span>
+      <span class="mono" id="degrade-load-text">NPU 0%</span>
+    </div>
+
+    <!-- 高層 PoC 實戰控制台：資料來源切換 / 公開資料集回放 / 混合實況鏡頭 / 批次評估 -->
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">
+          高層 Demo 實戰控制台：公開資料集回放（Log-Replay）× 混合實況鏡頭（Hybrid Live）
+          <span class="badge badge-cyan mono" id="source-mode-badge">模式：SIMULATOR</span>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <button class="btn btn-normal" id="btn-run-eval" type="button">★ 一鍵產出高層批次評估報表</button>
+        </div>
+      </div>
+
+      <div class="poc-grid">
+        <!-- 1. 資料來源切換與 Ground Truth 對照 -->
+        <div class="poc-box">
+          <div class="sub-label">1. 資料來源輸入模式切換</div>
+          <div class="btn-group" id="mode-buttons">
+            <button class="btn active" type="button" data-mode="simulator">合成模擬 (Simulator)</button>
+            <button class="btn" type="button" data-mode="log_replay">公開資料集回放 (Log-Replay)</button>
+            <button class="btn" type="button" data-mode="hybrid_live">混合實況 (Hybrid Live)</button>
+          </div>
+          <div class="sub-label" style="margin-top:4px;">即時 Ground Truth 與單模態比較</div>
+          <div id="gt-compare-box" style="font-size:12px; color:var(--text-secondary);">
+            目前為合成情境模擬模式；點擊「公開資料集回放」可載入含雜訊標記之真實時間軸。
+          </div>
+        </div>
+
+        <!-- 2. 時間軸播放控制與外部公開資料匯入 -->
+        <div class="poc-box">
+          <div class="sub-label">2. 時間軸回放控制（5 場景基準 / 外部匯入）</div>
+          <div style="display:flex; gap:6px; align-items:center;">
+            <select class="select-input" id="select-replay-track"></select>
+            <button class="btn" id="btn-load-track" type="button" style="white-space:nowrap;">載入軌跡</button>
+          </div>
+          <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+            <button class="btn" id="btn-replay-play" type="button">播放 / 暫停</button>
+            <button class="btn" id="btn-replay-step" type="button">單步 +1 幀</button>
+            <select class="select-input" id="select-replay-speed" style="width:auto;">
+              <option value="0.5">0.5x 慢速檢視</option>
+              <option value="1" selected>1.0x 原速</option>
+              <option value="2">2.0x 快速瀏覽</option>
+            </select>
+            <span class="mono" id="replay-frame-counter" style="font-size:12px; margin-left:auto;">0 / 0 幀</span>
+          </div>
+          <input class="range-slider" id="replay-seek-slider" type="range" min="0" max="119" value="0" />
+          <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-top:2px;">
+            <input type="file" id="input-upload-file" accept=".csv,.jsonl,.txt" style="font-size:11px; max-width:170px; color:var(--text-secondary);" />
+            <select class="select-input" id="select-upload-fmt" style="width:auto; padding:4px 6px; font-size:11px;">
+              <option value="auto">自動偵測格式</option>
+              <option value="esp_csi">ESP-CSI CSV</option>
+              <option value="ti_mmwave">TI mmWave CSV</option>
+              <option value="thermal_csv">Thermal CSV</option>
+              <option value="jsonl">Unified JSONL</option>
+            </select>
+            <select class="select-input" id="select-upload-scen" style="width:auto; padding:4px 6px; font-size:11px;">
+              <option value="A1">A1</option>
+              <option value="C4">C4</option>
+              <option value="B1">B1</option>
+              <option value="C1">C1</option>
+              <option value="B2">B2</option>
+            </select>
+            <button class="btn" id="btn-upload-dataset" type="button">匯入並回放</button>
+          </div>
+        </div>
+
+        <!-- 3. 混合實況真實攝影機隱私閘控 -->
+        <div class="poc-box">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="sub-label" style="margin:0;">3. 混合實況真實鏡頭 (Privacy Gate)</div>
+            <span class="badge badge-emerald mono" id="cam-hw-badge">PHYSICALLY_OFF</span>
+          </div>
+          <div style="font-size:12px; color:var(--text-secondary);" id="cam-gate-desc">
+            預設 Camera-Off：L0/L1 不會開啟鏡頭，僅於異常升階 L2/L3 時擷取一幀進入 RAM 提取骨架並即刻覆寫清零。
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-normal" id="btn-toggle-webcam" type="button">開啟瀏覽器實況鏡頭</button>
+            <button class="btn btn-noise" id="btn-test-gate-reject" type="button">測試硬闖 L0/L1 門禁</button>
+          </div>
+          <div class="mono" style="font-size:11px; color:var(--text-muted);" id="cam-backend-info">
+            推論後端：待命中 | 實況清零：0.000 ms | 攔截次數：0
+          </div>
+          <video id="live-video" autoplay playsinline muted style="display:none;"></video>
+          <canvas id="live-grab-canvas" width="320" height="240" style="display:none;"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- 高層批次評估報表卡片（點擊一鍵產出後顯示） -->
+    <section class="card" id="eval-report-card" style="display:none;">
+      <div class="card-header">
+        <div class="card-title">
+          高層 PoC 批次評估報告（600 幀跨 5 場景實測時間軸）
+          <span class="badge badge-emerald" id="eval-report-badge">已完成驗證</span>
+        </div>
+        <button class="btn" id="btn-close-eval" type="button">收合報表</button>
+      </div>
+      <div class="eval-summary-grid" id="eval-summary-grid"></div>
+      <div class="audit-table-wrap" style="max-height:240px;">
+        <table class="audit-table">
+          <thead>
+            <tr>
+              <th>場景軌跡</th>
+              <th>TP / FP / TN / FN</th>
+              <th>準確率 / Precision / Recall / F1</th>
+              <th>單模態誤報 vs 四模態誤報</th>
+              <th>平均延遲 / RAM 清零</th>
+              <th>常態頻寬節省 (全段含 L3)</th>
+            </tr>
+          </thead>
+          <tbody id="eval-report-tbody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 控制面板：場景熱切換 / 硬體形態切換 / 情境注入 -->
+    <section class="card">
+      <div class="control-grid">
+        <div>
+          <div class="sub-label">五大可插拔場景模組熱切換（Hot-Swap）</div>
+          <div class="btn-group" id="scenario-buttons"></div>
+          <div class="sub-label" style="margin-top: 10px;">目前模組說明</div>
+          <div id="scenario-desc-box" style="font-size:12px; color:var(--text-secondary);">載入中...</div>
+        </div>
+
+        <div>
+          <div class="sub-label">三大硬體部署形態藍本切換</div>
+          <div class="btn-group" id="hardware-buttons"></div>
+          <div class="hw-meta" id="hardware-meta"></div>
+        </div>
+
+        <div>
+          <div class="sub-label">基準／在席正常情境（Normal）</div>
+          <div class="btn-group" id="inject-normal"></div>
+          <div class="sub-label">真實異常觸發（True Positive）</div>
+          <div class="btn-group" id="inject-tp"></div>
+          <div class="sub-label">故意誤報干擾對照（False Alarm Filter）</div>
+          <div class="btn-group" id="inject-noise"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- L0-L3 隱私狀態機與防抖、雙因子授權 -->
+    <section class="card">
+      <div class="card-header">
+        <div class="card-title">
+          Privacy-by-Design 分級喚醒狀態機（L0 → L3）
+          <span class="badge badge-cyan" id="privacy-compliance-badge">Tier-0</span>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <span class="badge badge-emerald mono" id="ram-wipe-badge">Volatile RAM 清零：0.00 ms (&lt;100ms)</span>
+          <span class="badge badge-indigo mono" id="zero-disk-badge">Zero Disk Persistence: VERIFIED</span>
+        </div>
+      </div>
+      <div class="fsm-strip">
+        <div class="l-stages">
+          <div class="l-node L0" id="node-L0">
+            <div class="l-code">L0</div>
+            <div class="l-name">常駐無線感知</div>
+            <div class="l-desc">CSI 100Hz / BLE<br>Camera-Off・雷達 LPDS</div>
+          </div>
+          <div class="l-node L1" id="node-L1">
+            <div class="l-code">L1</div>
+            <div class="l-name">非視覺雙物理驗證</div>
+            <div class="l-desc">mmWave 10Hz + Thermal<br>Camera-Off（零影像）</div>
+          </div>
+          <div class="l-node L2" id="node-L2">
+            <div class="l-code">L2</div>
+            <div class="l-name">邊緣去識別骨架</div>
+            <div class="l-desc">TEE RAM 17點骨架<br>&lt;100 ms 覆寫清零</div>
+          </div>
+          <div class="l-node L3" id="node-L3">
+            <div class="l-code">L3</div>
+            <div class="l-name">授權加密存證</div>
+            <div class="l-desc">AES-256-GCM Pre-roll<br>雙因子授權與通報</div>
+          </div>
+        </div>
+
+        <div class="auth-box">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; font-weight:700;">遲滯防抖冷卻計時（Hysteresis）</span>
+            <span class="mono" style="font-size:12px;" id="hyst-text">待機無降階倒數</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="hyst-bar" style="width:0%;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <span style="font-size:11px; color:var(--text-secondary);">防止臨界值反覆切換震盪</span>
+            <button class="btn" id="btn-fast-forward" type="button">快進模擬時間 +40s</button>
+          </div>
+        </div>
+
+        <div class="auth-box">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12px; font-weight:700;">L3 雙因子緊急授權（RBAC + OTP）</span>
+            <span class="badge badge-indigo" id="l3-auth-status">未啟封</span>
+          </div>
+          <div class="input-row">
+            <input class="input" id="input-operator" value="sec-op-01" title="授權操作員 ID" />
+            <input class="input" id="input-otp" value="842916" maxlength="6" title="6 位數動態 OTP" style="width:76px;" />
+            <button class="btn btn-danger" id="btn-l3-grant" type="button">授權啟封 L3</button>
+            <button class="btn btn-normal" id="btn-l3-revoke" type="button">解除警報復歸</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 四模態感測器即時視覺化 Canvas -->
+    <section class="sensor-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">1. 無線物理感測（Wi-Fi 802.11bf CSI / BLE / UWB）</div>
+          <span class="badge badge-cyan mono" id="badge-csi-hz">100 Hz</span>
+        </div>
+        <div class="canvas-wrap">
+          <canvas class="sensor-canvas" id="canvas-csi" width="680" height="240"></canvas>
+        </div>
+        <div class="sensor-footer" id="footer-csi"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">2. 60/77 GHz mmWave 空間點雲雷達圖</div>
+          <span class="badge badge-emerald mono" id="badge-mmw-hz">LPDS 休眠</span>
+        </div>
+        <div class="canvas-wrap">
+          <canvas class="sensor-canvas" id="canvas-mmwave" width="680" height="240"></canvas>
+        </div>
+        <div class="sensor-footer" id="footer-mmwave"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">3. VOx 遠紅外線偽彩熱陣列圖（16×12）</div>
+          <span class="badge badge-amber mono" id="badge-thm-hz">關斷待機</span>
+        </div>
+        <div class="canvas-wrap">
+          <canvas class="sensor-canvas" id="canvas-thermal" width="680" height="240"></canvas>
+        </div>
+        <div class="sensor-footer" id="footer-thermal"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">4. IP Camera 隱私閘控區（L0/L1 鎖定・L2 骨架・L3 授權存證）</div>
+          <span class="badge badge-rose mono" id="badge-rgb-fps">0 fps (Camera-Off)</span>
+        </div>
+        <div class="canvas-wrap">
+          <canvas class="sensor-canvas" id="canvas-rgb" width="680" height="240"></canvas>
+        </div>
+        <div class="sensor-footer" id="footer-rgb"></div>
+      </div>
+    </section>
+
+    <!-- D-S 融合指標 + 場景評估與防誤報旗標 -->
+    <section class="mid-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Dempster-Shafer (D-S) 證據合併理論與 100ms 對齊狀態</div>
+          <span class="badge badge-indigo mono" id="align-quality-badge">對齊品質 1.00</span>
+        </div>
+        <div class="kpi-mini-grid">
+          <div class="kpi-box">
+            <div class="kpi-label">Bel(Alert) 信念度</div>
+            <div class="kpi-val mono" id="ds-bel-alert" style="color:var(--rose);">0.000</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">Pl(Alert) 似然上限</div>
+            <div class="kpi-val mono" id="ds-pl-alert" style="color:var(--amber);">0.000</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">m(Θ) 不確定度</div>
+            <div class="kpi-val mono" id="ds-unc" style="color:var(--text-secondary);">0.000</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">衝突係數 K</div>
+            <div class="kpi-val mono" id="ds-conflict" style="color:var(--cyan);">0.000</div>
+          </div>
+        </div>
+        <div id="bpa-list"></div>
+        <div style="font-size:11px; color:var(--text-secondary); margin-top:8px;" id="align-detail-line"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">場景模組即時評估、防誤報濾波與北向聯動指令</div>
+          <span class="badge badge-emerald mono" id="eval-risk-badge">SAFE</span>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;" id="eval-flags"></div>
+        <div class="sub-label">推論與規則判定依據</div>
+        <ul class="reason-list" id="eval-reasons"></ul>
+        <div class="sub-label" style="margin-top:10px;">北向工業／醫療／樓宇聯動（Northbound Dispatch）</div>
+        <div id="eval-commands"></div>
+      </div>
+    </section>
+
+    <!-- 功耗 / 頻寬 / 延遲儀表 + 稽核日誌 -->
+    <section class="bottom-grid">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">即時功耗、雙向頻寬與端對端延遲預算</div>
+          <span class="badge badge-cyan mono" id="npu-load-badge">NPU 負載 0%</span>
+        </div>
+        <div class="kpi-mini-grid" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="kpi-box">
+            <div class="kpi-label">對外上行頻寬</div>
+            <div class="kpi-val mono" id="bw-uplink">3.2 kbps</div>
+            <div class="kpi-label mono" id="bw-saving">節省 99.9% vs 4K</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">整機／增量功耗</div>
+            <div class="kpi-val mono" id="pwr-total">21.1 W</div>
+            <div class="kpi-label mono" id="pwr-inc">感測+NPU: 0.6 W</div>
+          </div>
+          <div class="kpi-box">
+            <div class="kpi-label">端對端總延遲</div>
+            <div class="kpi-val mono" id="lat-total">30 ms</div>
+            <div class="kpi-label mono" id="bw-internal">內部匯流 0.9 Mbps</div>
+          </div>
+        </div>
+
+        <div class="sub-label">PoE 供電預算佔用（<span class="mono" id="poe-label">0 / 51 W</span>）</div>
+        <div class="progress-track">
+          <div class="progress-fill" id="poe-bar" style="width:40%;"></div>
+        </div>
+
+        <div class="sub-label" style="margin-top:12px;">Stage 0 – Stage 4 延遲拆解（ms）</div>
+        <div class="latency-stack" id="lat-stack"></div>
+        <div style="display:flex; flex-wrap:wrap; gap:10px; font-size:11px; color:var(--text-secondary);" id="lat-legend"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">隱私清零（Volatile RAM &lt; 100ms）與北向聯動稽核紀錄</div>
+          <span class="badge badge-emerald mono" id="audit-count-badge">0 筆</span>
+        </div>
+        <div class="audit-table-wrap">
+          <table class="audit-table">
+            <thead>
+              <tr>
+                <th>模擬時刻</th>
+                <th>事件類別</th>
+                <th>階級</th>
+                <th>RAM 清零</th>
+                <th>稽核詳情與動作</th>
+              </tr>
+            </thead>
+            <tbody id="audit-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const state = {
+        catalog: null,
+        snapshot: null,
+        ws: null,
+        paused: false,
+        stressEnabled: false,
+        sweepAngle: 0,
+        webcamStream: null,
+        webcamTimer: null,
+        webcamUploading: false,
+        l3PreviewImg: null,
+        l3PreviewSrc: ""
+      };
+
+      const COCO_EDGES = [
+        [0, 1], [0, 2], [1, 3], [2, 4],
+        [5, 6], [5, 7], [7, 9], [6, 8], [8, 10],
+        [5, 11], [6, 12], [11, 12],
+        [11, 13], [13, 15], [12, 14], [14, 16]
+      ];
+
+      function cssVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+      }
+
+      async function apiPost(url, bodyObj) {
+        const opts = {
+          method: "POST",
+          headers: { "Content-Type": "application/json" }
+        };
+        if (bodyObj !== undefined) {
+          opts.body = JSON.stringify(bodyObj);
+        }
+        const res = await fetch(url, opts);
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.detail || "操作失敗");
+          return null;
+        }
+        return data;
+      }
+
+      async function loadCatalog() {
+        const res = await fetch("/api/scenarios");
+        state.catalog = await res.json();
+        renderControlButtons();
+      }
+
+      function renderControlButtons() {
+        if (!state.catalog) return;
+
+        const scenWrap = document.getElementById("scenario-buttons");
+        scenWrap.innerHTML = "";
+        for (const sc of state.catalog.scenarios) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "btn";
+          btn.dataset.scenario = sc.id;
+          btn.textContent = sc.id + "｜" + sc.name.split(" ")[1];
+          btn.title = sc.description;
+          btn.addEventListener("click", async () => {
+            const snap = await apiPost("/api/scenario/" + sc.id);
+            if (snap) updateUI(snap);
+          });
+          scenWrap.appendChild(btn);
+        }
+
+        const hwWrap = document.getElementById("hardware-buttons");
+        hwWrap.innerHTML = "";
+        for (const hw of state.catalog.hardware_profiles) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "btn";
+          btn.dataset.hw = hw.id;
+          btn.textContent = hw.id === "phase1_distributed_mvp" ? "Phase 1 分散式" :
+                            hw.id === "phase2_all_in_one_tier2" ? "Tier 2 一體機" : "Tier 3 工業級";
+          btn.title = hw.name;
+          btn.addEventListener("click", async () => {
+            const snap = await apiPost("/api/hardware/" + hw.id);
+            if (snap) updateUI(snap);
+          });
+          hwWrap.appendChild(btn);
+        }
+
+        const normalWrap = document.getElementById("inject-normal");
+        const tpWrap = document.getElementById("inject-tp");
+        const noiseWrap = document.getElementById("inject-noise");
+        normalWrap.innerHTML = "";
+        tpWrap.innerHTML = "";
+        noiseWrap.innerHTML = "";
+
+        for (const ev of state.catalog.injectable_events) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.dataset.event = ev.event_name;
+          btn.title = ev.description;
+          btn.textContent = ev.title.replace(/\s*\(.*?\)/, "");
+          if (ev.category === "normal") {
+            btn.className = "btn btn-normal";
+            normalWrap.appendChild(btn);
+          } else if (ev.category === "true_positive") {
+            btn.className = "btn btn-danger";
+            tpWrap.appendChild(btn);
+          } else {
+            btn.className = "btn btn-noise";
+            noiseWrap.appendChild(btn);
+          }
+          btn.addEventListener("click", async () => {
+            const snap = await apiPost("/api/inject/" + ev.event_name);
+            if (snap) updateUI(snap);
+          });
+        }
+
+        // Populate Log-Replay tracks dropdown
+        const trackSel = document.getElementById("select-replay-track");
+        if (trackSel && state.catalog.replay_tracks) {
+          const prevVal = trackSel.value;
+          trackSel.innerHTML = "";
+          for (const t of state.catalog.replay_tracks) {
+            const opt = document.createElement("option");
+            opt.value = t.track_id;
+            opt.textContent = "[" + t.scenario_id + "] " + t.title + " (" + t.total_frames + "幀)";
+            trackSel.appendChild(opt);
+          }
+          if (prevVal && Array.from(trackSel.options).some((o) => o.value === prevVal)) {
+            trackSel.value = prevVal;
+          }
+        }
+      }
+
+      function updateUI(snap) {
+        state.snapshot = snap;
+
+        document.getElementById("sim-clock").textContent = "模擬時間 " + snap.sim_time_s.toFixed(1) + "s";
+
+        // Update Mode / Log-Replay / Hybrid Live status
+        const curMode = snap.source_mode || "simulator";
+        const modeBadge = document.getElementById("source-mode-badge");
+        if (modeBadge) {
+          modeBadge.textContent = "模式：" + curMode.toUpperCase();
+        }
+        document.querySelectorAll("#mode-buttons .btn").forEach((b) => {
+          b.classList.toggle("active", b.dataset.mode === curMode);
+        });
+
+        const rs = snap.replay_status;
+        const gtBox = document.getElementById("gt-compare-box");
+        if (rs && curMode !== "simulator") {
+          const trackSel = document.getElementById("select-replay-track");
+          if (trackSel && rs.active_track_id && trackSel.value !== rs.active_track_id) {
+            trackSel.value = rs.active_track_id;
+          }
+          const slider = document.getElementById("replay-seek-slider");
+          if (slider) {
+            slider.max = Math.max(0, rs.total_frames - 1);
+            slider.value = rs.frame_index;
+          }
+          const counter = document.getElementById("replay-frame-counter");
+          if (counter) {
+            counter.textContent = (rs.frame_index + 1) + " / " + rs.total_frames + " 幀 (" + rs.progress_pct.toFixed(0) + "%)";
+          }
+          const playBtn = document.getElementById("btn-replay-play");
+          if (playBtn) {
+            playBtn.textContent = rs.playing ? "暫停回放" : "繼續播放";
+            playBtn.classList.toggle("active", rs.playing);
+          }
+          if (gtBox) {
+            const alertTag = rs.gt_is_alert
+              ? "<span class='badge badge-rose'>GT: 真實異常事件</span>"
+              : "<span class='badge badge-emerald'>GT: 安全／干擾基線</span>";
+            const singleTag = rs.single_modality_would_false_alarm
+              ? "<span class='badge badge-gold'>單模態必誤報 ✓ 已被四模態過濾</span>"
+              : "";
+            gtBox.innerHTML =
+              "<div style='display:flex; gap:6px; flex-wrap:wrap; margin-bottom:4px;'>" + alertTag + singleTag + "</div>" +
+              "<div><strong>當前分段：</strong>" + rs.gt_segment + "</div>" +
+              "<div style='font-size:11px; margin-top:2px;'><strong>資料來源：</strong>" + rs.dataset_source + "</div>" +
+              (rs.single_modality_note ? "<div style='font-size:11px; color:var(--gold); margin-top:2px;'>對照說明：" + rs.single_modality_note + "</div>" : "");
+          }
+        } else if (gtBox) {
+          gtBox.innerHTML = "目前為<strong>合成情境模擬模式</strong>；切換至「公開資料集回放」可載入含真實雜訊與 Ground Truth 標記之時間軸。";
+        }
+
+        const cam = snap.live_camera_status;
+        if (cam) {
+          const hwBadge = document.getElementById("cam-hw-badge");
+          if (hwBadge) {
+            hwBadge.textContent = cam.camera_hardware_state;
+            hwBadge.className = "badge mono " + (
+              cam.camera_hardware_state === "PHYSICALLY_OFF" ? "badge-emerald" :
+              cam.camera_hardware_state === "REJECTED_BY_GATE" ? "badge-gold" :
+              cam.camera_hardware_state === "L3_AUTHORIZED_STREAM" ? "badge-rose" : "badge-amber"
+            );
+          }
+          const desc = document.getElementById("cam-gate-desc");
+          if (desc) desc.textContent = cam.note;
+          const info = document.getElementById("cam-backend-info");
+          if (info) {
+            info.textContent = "推論後端：" + cam.pose_backend + " | 實況清零：" +
+              cam.last_live_wipe_ms.toFixed(3) + " ms | 門禁攔截：" + cam.rejected_attempts + " 次";
+          }
+        }
+
+        // Highlight active controls
+        document.querySelectorAll("#scenario-buttons .btn").forEach((b) => {
+          b.classList.toggle("active", b.dataset.scenario === snap.active_scenario);
+        });
+        document.querySelectorAll("#hardware-buttons .btn").forEach((b) => {
+          b.classList.toggle("active", b.dataset.hw === snap.hardware_profile.id);
+        });
+        document.querySelectorAll("[data-event]").forEach((b) => {
+          b.classList.toggle("active", b.dataset.event === snap.active_event);
+        });
+
+        if (state.catalog) {
+          const curSc = state.catalog.scenarios.find((s) => s.id === snap.active_scenario);
+          if (curSc) {
+            document.getElementById("scenario-desc-box").textContent = curSc.name + "：" + curSc.description;
+          }
+        }
+
+        const hw = snap.hardware_profile;
+        document.getElementById("hardware-meta").innerHTML =
+          "<div><strong>Wi-Fi：</strong>" + hw.wifi_soc + "</div>" +
+          "<div><strong>NPU：</strong>" + hw.npu_soc + "</div>" +
+          "<div><strong>雷達：</strong>" + hw.radar_chip + "</div>" +
+          "<div><strong>熱像：</strong>" + hw.thermal_chip + "</div>" +
+          "<div><strong>供電：</strong>" + hw.poe_standard + "</div>" +
+          "<div><strong>BOM：</strong>" + hw.bom_range_usd + "</div>";
+
+        // L0-L3 State Machine
+        ["L0", "L1", "L2", "L3"].forEach((lvl) => {
+          document.getElementById("node-" + lvl).classList.toggle("active", snap.privacy_level === lvl);
+        });
+        document.getElementById("privacy-compliance-badge").textContent = snap.privacy_compliance_tier;
+
+        document.getElementById("ram-wipe-badge").textContent =
+          "Volatile RAM 清零：" + snap.last_ram_wipe_ms.toFixed(3) + " ms (<100ms)";
+        document.getElementById("zero-disk-badge").textContent =
+          snap.zero_disk_persistence ? "Zero Disk Persistence: VERIFIED" : "DISK CHECK WARN";
+
+        const hystBar = document.getElementById("hyst-bar");
+        const hystText = document.getElementById("hyst-text");
+        if (snap.hysteresis_target_level) {
+          const pct = Math.min(100, (snap.hysteresis_elapsed_s / snap.hysteresis_required_s) * 100);
+          hystBar.style.width = pct.toFixed(1) + "%";
+          hystText.textContent = "準備降階 → " + snap.hysteresis_target_level + " (" +
+            snap.hysteresis_elapsed_s.toFixed(1) + " / " + snap.hysteresis_required_s.toFixed(0) + "s)";
+        } else {
+          hystBar.style.width = "0%";
+          hystText.textContent = "穩定鎖定 " + snap.privacy_level + "（無降階倒數）";
+        }
+
+        const authBadge = document.getElementById("l3-auth-status");
+        if (snap.l3_authorized) {
+          authBadge.textContent = "已雙因子授權 (" + (snap.l3_operator_id || "op") + ")";
+          authBadge.className = "badge badge-rose";
+        } else {
+          authBadge.textContent = "未啟封";
+          authBadge.className = "badge badge-indigo";
+        }
+
+        // Graceful Degradation Banner
+        const degBanner = document.getElementById("degrade-banner");
+        degBanner.classList.toggle("visible", snap.graceful_degradation_active);
+        document.getElementById("degrade-load-text").textContent = "NPU " + snap.npu_load_pct.toFixed(1) + "%";
+
+        // Sensor Badges & Footers
+        const ss = snap.sensor_status;
+        const af = snap.aligned_frame;
+        document.getElementById("badge-csi-hz").textContent = ss.csi_hz.toFixed(0) + " Hz";
+        document.getElementById("badge-mmw-hz").textContent = ss.mmwave_hz > 0 ? ss.mmwave_hz.toFixed(0) + " Hz" : "LPDS 休眠";
+        document.getElementById("badge-thm-hz").textContent = ss.thermal_hz > 0 ? ss.thermal_hz.toFixed(0) + " Hz" : "關斷待機";
+        document.getElementById("badge-rgb-fps").textContent = ss.rgb_fps > 0 ? ss.rgb_fps.toFixed(0) + " fps" : "0 fps (Camera-Off)";
+
+        if (af.csi) {
+          document.getElementById("footer-csi").innerHTML =
+            "<span>Fresnel 方差：<strong class='mono'>" + af.csi.fresnel_variance.toFixed(3) + "</strong></span>" +
+            "<span>Doppler 能量：<strong class='mono'>" + af.csi.doppler_energy.toFixed(3) + "</strong></span>" +
+            "<span>BLE 白名單：<strong>" + (af.csi.ble_whitelist_present ? "有" : "無") + "</strong></span>" +
+            "<span>UWB 測距：<strong class='mono'>" + (af.csi.uwb_tag_distance_m !== null ? af.csi.uwb_tag_distance_m.toFixed(2) + "m" : "N/A") + "</strong></span>";
+        }
+        if (af.mmwave) {
+          document.getElementById("footer-mmwave").innerHTML =
+            "<span>狀態：<strong>" + ss.mmwave_mode + "</strong></span>" +
+            "<span>質心高度 Z：<strong class='mono'>" + af.mmwave.centroid_z_m.toFixed(2) + "m</strong></span>" +
+            "<span>呼吸率：<strong class='mono'>" + af.mmwave.breathing_bpm.toFixed(1) + " bpm</strong></span>" +
+            "<span>人體微多普勒：<strong class='mono'>" + af.mmwave.micro_doppler_human_score.toFixed(2) + "</strong></span>";
+        }
+        if (af.thermal) {
+          document.getElementById("footer-thermal").innerHTML =
+            "<span>模式：<strong>" + ss.thermal_mode + "</strong></span>" +
+            "<span>最高溫：<strong class='mono'>" + af.thermal.max_temp_c.toFixed(1) + "°C</strong></span>" +
+            "<span>溫升斜率：<strong class='mono'>+" + af.thermal.temp_rise_rate_c_per_min.toFixed(1) + "°C/m</strong></span>" +
+            "<span>人體熱比：<strong class='mono'>" + (af.thermal.human_body_temp_ratio * 100).toFixed(0) + "%</strong></span>";
+        }
+        document.getElementById("footer-rgb").innerHTML =
+          "<span>模式：<strong>" + ss.rgb_mode + "</strong></span>" +
+          "<span>RAM 覆寫：<strong class='mono'>" + snap.last_ram_wipe_ms.toFixed(3) + " ms</strong></span>" +
+          "<span>磁碟零落盤：<strong>" + (snap.zero_disk_persistence ? "YES" : "NO") + "</strong></span>";
+
+        // D-S Metrics & BPA Bars
+        const ds = snap.ds_fusion;
+        document.getElementById("align-quality-badge").textContent = "對齊品質 " + af.alignment_quality.toFixed(2);
+        document.getElementById("ds-bel-alert").textContent = ds.belief_alert.toFixed(3);
+        document.getElementById("ds-pl-alert").textContent = ds.plausibility_alert.toFixed(3);
+        document.getElementById("ds-unc").textContent = ds.m_uncertainty.toFixed(3);
+        document.getElementById("ds-conflict").textContent =
+          ds.conflict_k.toFixed(3) + (ds.high_conflict_flag ? " (高衝突!)" : "");
+
+        document.getElementById("align-detail-line").textContent =
+          "100ms 滑動視窗時差補償 → CSI: " + af.csi_offset_ms.toFixed(1) + "ms | mmWave: " +
+          af.mmwave_offset_ms.toFixed(1) + "ms (卡爾曼外推=" + af.mmwave_extrapolated +
+          ") | Thermal: " + af.thermal_offset_ms.toFixed(1) + "ms";
+
+        const bpaWrap = document.getElementById("bpa-list");
+        bpaWrap.innerHTML = "";
+        for (const b of ds.modality_bpas) {
+          const row = document.createElement("div");
+          row.className = "bpa-row";
+          const pctN = (b.m_normal * 100).toFixed(1);
+          const pctA = (b.m_alert * 100).toFixed(1);
+          const pctU = (b.m_uncertainty * 100).toFixed(1);
+          row.innerHTML =
+            "<div class='bpa-label-row'>" +
+            "<span><strong>" + b.modality + "</strong>" + (b.active ? "" : " (休眠)") + " — <span style='color:var(--text-secondary)'>" + b.rationale + "</span></span>" +
+            "<span class='mono'>N:" + b.m_normal.toFixed(2) + " A:" + b.m_alert.toFixed(2) + " Θ:" + b.m_uncertainty.toFixed(2) + "</span>" +
+            "</div>" +
+            "<div class='bpa-bar'>" +
+            "<div class='seg-normal' style='width:" + pctN + "%'></div>" +
+            "<div class='seg-alert' style='width:" + pctA + "%'></div>" +
+            "<div class='seg-unc' style='width:" + pctU + "%'></div>" +
+            "</div>";
+          bpaWrap.appendChild(row);
+        }
+
+        // Scenario Evaluation
+        const ev = snap.evaluation;
+        const riskBadge = document.getElementById("eval-risk-badge");
+        riskBadge.textContent = ev.risk_level + " (信心 " + (ev.confidence * 100).toFixed(0) + "%)";
+        riskBadge.className = "badge mono " + (
+          ev.risk_level === "CRITICAL" ? "badge-rose" :
+          ev.risk_level === "HIGH" ? "badge-amber" :
+          ev.false_alarm_suppressed ? "badge-gold" : "badge-emerald"
+        );
+
+        const flagsWrap = document.getElementById("eval-flags");
+        flagsWrap.innerHTML = "";
+        if (ev.false_alarm_suppressed) {
+          const sp = document.createElement("span");
+          sp.className = "badge badge-gold";
+          sp.textContent = "✓ 誤報干擾已成功過濾抑制";
+          flagsWrap.appendChild(sp);
+        }
+        for (const f of ev.anti_false_alarm_flags) {
+          const sp = document.createElement("span");
+          sp.className = "badge " + (f.triggered ? "badge-emerald" : "badge-indigo");
+          sp.title = f.description;
+          sp.textContent = (f.triggered ? "✓ 已濾除：" : "待命：") + f.rule_name;
+          flagsWrap.appendChild(sp);
+        }
+
+        const rList = document.getElementById("eval-reasons");
+        rList.innerHTML = "";
+        for (const r of ev.trigger_reasons) {
+          const li = document.createElement("li");
+          li.textContent = r;
+          rList.appendChild(li);
+        }
+
+        const cmdWrap = document.getElementById("eval-commands");
+        if (ev.northbound_commands.length === 0) {
+          cmdWrap.innerHTML = "<div class='cmd-box' style='color:var(--text-secondary);'>目前無須下發北向聯動控制命令</div>";
+        } else {
+          cmdWrap.innerHTML = ev.northbound_commands.map((c) =>
+            "<div class='cmd-box'>" +
+            "<div><span class='badge badge-cyan'>" + c.protocol + "</span> <strong>" + c.action + "</strong> → " + c.target + "</div>" +
+            "<div class='mono' style='margin-top:4px; color:var(--text-secondary); font-size:11px;'>" + JSON.stringify(c.payload) + "</div>" +
+            "</div>"
+          ).join("");
+        }
+
+        // Bandwidth / Power / Latency
+        const bw = snap.bandwidth;
+        const pwr = snap.power;
+        const lat = snap.latency;
+        document.getElementById("npu-load-badge").textContent = "NPU 負載 " + snap.npu_load_pct.toFixed(1) + "%";
+        document.getElementById("bw-uplink").textContent =
+          bw.uplink_kbps >= 1000 ? bw.uplink_mbps.toFixed(1) + " Mbps" : bw.uplink_kbps.toFixed(1) + " kbps";
+        document.getElementById("bw-saving").textContent = "節省 " + bw.saving_vs_4k_pct.toFixed(1) + "% vs 4K";
+        document.getElementById("bw-internal").textContent = "內部匯流 " + bw.internal_bus_mbps.toFixed(1) + " Mbps";
+        document.getElementById("pwr-total").textContent = pwr.total_system_w.toFixed(1) + " W";
+        document.getElementById("pwr-inc").textContent = "感測+NPU: " + pwr.sensor_npu_incremental_w.toFixed(2) + " W";
+        document.getElementById("lat-total").textContent = lat.total_e2e_ms.toFixed(0) + " ms";
+
+        document.getElementById("poe-label").textContent =
+          pwr.total_system_w.toFixed(1) + " / " + pwr.poe_budget_w.toFixed(1) + " W (" + pwr.poe_utilization_pct.toFixed(1) + "%)";
+        const poeBar = document.getElementById("poe-bar");
+        poeBar.style.width = Math.min(100, pwr.poe_utilization_pct).toFixed(1) + "%";
+        poeBar.style.background = pwr.poe_warning ? "var(--rose)" : "linear-gradient(90deg, var(--cyan), var(--emerald))";
+
+        const stages = [
+          { label: "S0 RF", val: lat.stage0_rf_ms, color: "#38bdf8" },
+          { label: "S1 L1喚醒", val: lat.stage1_l1_wakeup_ms, color: "#34d399" },
+          { label: "S2 RGB對齊", val: lat.stage2_rgb_align_ms, color: "#818cf8" },
+          { label: "S3 NPU推論", val: lat.stage3_npu_infer_ms, color: "#fb923c" },
+          { label: "S4 加密傳輸", val: lat.stage4_encrypt_tx_ms, color: "#fb7185" }
+        ];
+        const sumLat = Math.max(1, lat.total_e2e_ms);
+        document.getElementById("lat-stack").innerHTML = stages.map((s) =>
+          "<div style='width:" + ((s.val / sumLat) * 100).toFixed(1) + "%; background:" + s.color + ";'></div>"
+        ).join("");
+        document.getElementById("lat-legend").innerHTML = stages.map((s) =>
+          "<span class='mono'><span style='color:" + s.color + "'>■</span> " + s.label + ": " + s.val.toFixed(0) + "ms</span>"
+        ).join("");
+
+        // Audit Table
+        document.getElementById("audit-count-badge").textContent = snap.recent_audits.length + " 筆";
+        const tbody = document.getElementById("audit-tbody");
+        tbody.innerHTML = snap.recent_audits.slice(0, 15).map((a) =>
+          "<tr>" +
+          "<td class='mono'>" + a.sim_time_s.toFixed(1) + "s</td>" +
+          "<td class='mono'>" + a.event_type + "</td>" +
+          "<td><span class='badge badge-cyan'>" + a.privacy_level + "</span></td>" +
+          "<td class='mono'>" + (a.ram_wipe_ms !== null ? a.ram_wipe_ms.toFixed(3) + "ms" : "—") + "</td>" +
+          "<td>" + a.detail + "</td>" +
+          "</tr>"
+        ).join("");
+
+        // Draw all 4 sensor canvases
+        drawCsiCanvas(snap);
+        drawMmwaveCanvas(snap);
+        drawThermalCanvas(snap);
+        drawRgbCanvas(snap);
+      }
+
+      function drawCsiCanvas(snap) {
+        const canvas = document.getElementById("canvas-csi");
+        const ctx = canvas.getContext("2d");
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const gridCol = cssVar("--border-subtle");
+        const cyan = cssVar("--cyan");
+        const indigo = cssVar("--indigo");
+        const textMut = cssVar("--text-muted");
+
+        // Grid
+        ctx.strokeStyle = gridCol;
+        ctx.lineWidth = 1;
+        for (let i = 1; i < 4; i++) {
+          const y = (h / 4) * i;
+          ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+        }
+        for (let i = 1; i < 6; i++) {
+          const x = (w / 6) * i;
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+        }
+
+        const csi = snap.aligned_frame.csi;
+        if (!csi || !csi.subcarrier_amplitudes.length) return;
+
+        const amps = csi.subcarrier_amplitudes;
+        const phases = csi.phase_diffs;
+        const padX = 24, padY = 24;
+        const plotW = w - padX * 2, plotH = h - padY * 2;
+
+        // Amplitude wave + fill
+        ctx.beginPath();
+        amps.forEach((v, idx) => {
+          const x = padX + (idx / (amps.length - 1)) * plotW;
+          const y = h - padY - v * plotH * 0.88;
+          if (idx === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.strokeStyle = cyan;
+        ctx.lineWidth = 2.6;
+        ctx.stroke();
+
+        ctx.lineTo(padX + plotW, h - padY);
+        ctx.lineTo(padX, h - padY);
+        ctx.closePath();
+        ctx.fillStyle = "rgba(56, 189, 248, 0.14)";
+        ctx.fill();
+
+        // Phase diff curve
+        if (phases.length === amps.length) {
+          ctx.beginPath();
+          ctx.setLineDash([5, 4]);
+          phases.forEach((p, idx) => {
+            const x = padX + (idx / (phases.length - 1)) * plotW;
+            const norm = 0.5 + Math.max(-0.48, Math.min(0.48, p / 4.2));
+            const y = h - padY - norm * plotH;
+            if (idx === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          ctx.strokeStyle = indigo;
+          ctx.lineWidth = 2.0;
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+
+        ctx.fillStyle = textMut;
+        ctx.font = "11px monospace";
+        ctx.fillText("802.11bf NDP Subcarriers #1–#30 (Cyan=振幅 | Indigo=相位差)", 12, 16);
+      }
+
+      function drawMmwaveCanvas(snap) {
+        const canvas = document.getElementById("canvas-mmwave");
+        const ctx = canvas.getContext("2d");
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const isL0 = snap.privacy_level === "L0";
+        const emerald = cssVar("--emerald");
+        const rose = cssVar("--rose");
+        const amber = cssVar("--amber");
+        const gridCol = cssVar("--border-strong");
+        const textCol = cssVar("--text-secondary");
+
+        const cx = w / 2, cy = h - 22;
+        const maxR = Math.min(w * 0.45, h - 36);
+
+        // Radar range arcs (1m..6m)
+        ctx.strokeStyle = gridCol;
+        ctx.lineWidth = 1;
+        for (let rIdx = 1; rIdx <= 4; rIdx++) {
+          const r = (maxR / 4) * rIdx;
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, Math.PI, 2 * Math.PI);
+          ctx.stroke();
+          ctx.fillStyle = textCol;
+          ctx.font = "10px monospace";
+          ctx.fillText((rIdx * 1.5).toFixed(1) + "m", cx + r - 24, cy - 4);
+        }
+
+        if (isL0) {
+          ctx.fillStyle = "rgba(15, 23, 42, 0.55)";
+          ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = emerald;
+          ctx.font = "bold 14px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("mmWave LPDS 深度休眠中 (~0.5 mW / 2ms GPIO 喚醒就緒)", cx, h / 2);
+          ctx.textAlign = "left";
+          return;
+        }
+
+        // Animated sweep beam
+        state.sweepAngle = (state.sweepAngle + 0.06) % Math.PI;
+        const bx = cx + Math.cos(Math.PI + state.sweepAngle) * maxR;
+        const by = cy + Math.sin(Math.PI + state.sweepAngle) * maxR;
+        ctx.strokeStyle = "rgba(52, 211, 153, 0.45)";
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(bx, by); ctx.stroke();
+
+        const mmw = snap.aligned_frame.mmwave;
+        if (mmw && mmw.points.length) {
+          const scale = maxR / 6.0;
+          for (const pt of mmw.points) {
+            const px = cx + pt.x * scale;
+            const py = cy - pt.y * scale;
+            const col = pt.vz < -0.5 ? rose : (pt.z < 0.55 ? amber : emerald);
+            ctx.beginPath();
+            ctx.arc(px, py, 4.2, 0, Math.PI * 2);
+            ctx.fillStyle = col;
+            ctx.fill();
+          }
+        }
+
+        ctx.fillStyle = textCol;
+        ctx.font = "11px monospace";
+        ctx.fillText("60/77GHz FMCW Top-Down 3D Point Cloud (" + (mmw ? mmw.points.length : 0) + " pts)", 12, 16);
+      }
+
+      function tempToRgb(t, tMin, tMax) {
+        const ratio = Math.max(0, Math.min(1, (t - tMin) / Math.max(1, tMax - tMin)));
+        let r = 0, g = 0, b = 0;
+        if (ratio < 0.33) {
+          const k = ratio / 0.33;
+          r = Math.round(18 + 140 * k);
+          g = Math.round(24 + 20 * k);
+          b = Math.round(90 + 80 * k);
+        } else if (ratio < 0.66) {
+          const k = (ratio - 0.33) / 0.33;
+          r = Math.round(158 + 92 * k);
+          g = Math.round(44 + 115 * k);
+          b = Math.round(170 - 140 * k);
+        } else {
+          const k = (ratio - 0.66) / 0.34;
+          r = 255;
+          g = Math.round(159 + 96 * k);
+          b = Math.round(30 + 190 * k);
+        }
+        return "rgb(" + r + "," + g + "," + b + ")";
+      }
+
+      function drawThermalCanvas(snap) {
+        const canvas = document.getElementById("canvas-thermal");
+        const ctx = canvas.getContext("2d");
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        if (snap.privacy_level === "L0") {
+          ctx.fillStyle = "rgba(15, 23, 42, 0.55)";
+          ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = cssVar("--cyan");
+          ctx.font = "bold 14px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("VOx Thermal 關斷待機中 (0–5 mW)", w / 2, h / 2);
+          ctx.textAlign = "left";
+          return;
+        }
+
+        const thm = snap.aligned_frame.thermal;
+        if (!thm || !thm.grid_flat.length) return;
+
+        const cols = thm.width, rows = thm.height;
+        const cellW = w / cols, cellH = h / rows;
+        const tMin = Math.min(20.0, thm.min_temp_c);
+        const tMax = Math.max(40.0, thm.max_temp_c);
+
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const temp = thm.grid_flat[r * cols + c];
+            ctx.fillStyle = tempToRgb(temp, tMin, tMax);
+            ctx.fillRect(c * cellW, r * cellH, cellW + 1, cellH + 1);
+          }
+        }
+
+        // Peak crosshair
+        const hx = thm.hotspot_x * w;
+        const hy = thm.hotspot_y * h;
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.arc(hx, hy, 12, 0, Math.PI * 2);
+        ctx.moveTo(hx - 18, hy); ctx.lineTo(hx + 18, hy);
+        ctx.moveTo(hx, hy - 18); ctx.lineTo(hx, hy + 18);
+        ctx.stroke();
+
+        ctx.fillStyle = "rgba(0,0,0,0.65)";
+        ctx.fillRect(10, 8, 250, 22);
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 12px monospace";
+        ctx.fillText("MAX " + thm.max_temp_c.toFixed(1) + "°C | ΔT/Δt +" + thm.temp_rise_rate_c_per_min.toFixed(1) + "°C/m", 16, 23);
+      }
+
+      function drawRgbCanvas(snap) {
+        const canvas = document.getElementById("canvas-rgb");
+        const ctx = canvas.getContext("2d");
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const lvl = snap.privacy_level;
+        const emerald = cssVar("--emerald");
+        const cyan = cssVar("--cyan");
+        const amber = cssVar("--amber");
+        const rose = cssVar("--rose");
+
+        if (lvl === "L0" || lvl === "L1") {
+          // 隱私鎖定遮罩
+          ctx.fillStyle = "rgba(15, 23, 42, 0.72)";
+          ctx.fillRect(0, 0, w, h);
+          ctx.strokeStyle = "rgba(56, 189, 248, 0.12)";
+          ctx.lineWidth = 1;
+          for (let d = -h; d < w + h; d += 22) {
+            ctx.beginPath(); ctx.moveTo(d, 0); ctx.lineTo(d + h, h); ctx.stroke();
+          }
+          ctx.strokeStyle = emerald;
+          ctx.lineWidth = 2.5;
+          ctx.strokeRect(w / 2 - 155, h / 2 - 44, 310, 88);
+          ctx.fillStyle = emerald;
+          ctx.font = "bold 15px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("PRIVACY SHIELD ACTIVE — 隱私鎖定遮罩", w / 2, h / 2 - 8);
+          ctx.fillStyle = "#cbd5e1";
+          ctx.font = "12px monospace";
+          ctx.fillText("Camera-Off by Default (" + lvl + ") | 硬體待機 < 5 mW | 零影像擷取", w / 2, h / 2 + 18);
+          ctx.textAlign = "left";
+          return;
+        }
+
+        // L2 或 L3 背景網格
+        ctx.fillStyle = "#060d18";
+        ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = "rgba(148, 163, 184, 0.14)";
+        ctx.lineWidth = 1;
+        for (let gx = 40; gx < w; gx += 40) {
+          ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, h); ctx.stroke();
+        }
+        for (let gy = 40; gy < h; gy += 40) {
+          ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke();
+        }
+
+        const rgb = snap.aligned_frame.rgb;
+        if (lvl === "L3" && !snap.l3_authorized) {
+          // 需操作員雙因子授權方可解封存證畫面，但同步顯示已提取之 17 點骨架
+          drawSkeleton(ctx, rgb, w, h, amber);
+          ctx.fillStyle = "rgba(225, 29, 72, 0.18)";
+          ctx.fillRect(0, 0, w, h);
+          ctx.fillStyle = "rgba(15, 23, 42, 0.85)";
+          ctx.fillRect(w / 2 - 210, 12, 420, 48);
+          ctx.strokeStyle = rose;
+          ctx.strokeRect(w / 2 - 210, 12, 420, 48);
+          ctx.fillStyle = "#fda4af";
+          ctx.font = "bold 13px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("L3 危急 Pre-roll 加密緩衝已鎖定 — 請點擊上方「授權啟封 L3」檢視存證", w / 2, 41);
+          ctx.textAlign = "left";
+          return;
+        }
+
+        if (lvl === "L3" && snap.l3_authorized) {
+          // 若混合實況產出經授權加密遮罩 JPEG 預覽，優先顯示真實畫面
+          const cam = snap.live_camera_status;
+          if (cam && cam.l3_preview_b64) {
+            const src = "data:image/jpeg;base64," + cam.l3_preview_b64;
+            if (state.l3PreviewSrc !== src) {
+              state.l3PreviewSrc = src;
+              const img = new Image();
+              img.src = src;
+              state.l3PreviewImg = img;
+            }
+            if (state.l3PreviewImg && state.l3PreviewImg.complete) {
+              ctx.drawImage(state.l3PreviewImg, 0, 0, w, h);
+            }
+          } else {
+            // 模擬經雙因子授權後之安全存證畫面（含匿名第三方模糊遮罩）
+            ctx.fillStyle = "rgba(15, 23, 42, 0.65)";
+            ctx.fillRect(18, 42, 130, 165);
+            ctx.fillStyle = "rgba(148, 163, 184, 0.25)";
+            ctx.fillRect(36, 60, 90, 120);
+            ctx.fillStyle = "#cbd5e1";
+            ctx.font = "11px sans-serif";
+            ctx.fillText("無關第三方動態模糊", 28, 198);
+          }
+
+          drawSkeleton(ctx, rgb, w, h, rose);
+
+          ctx.fillStyle = "rgba(225, 29, 72, 0.88)";
+          ctx.fillRect(12, 10, 410, 24);
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 12px monospace";
+          ctx.fillText("REC L3 AES-256-GCM 授權存證 | 雙向語音通話連線中", 20, 26);
+          return;
+        }
+
+        // L2 去識別化 17 點火柴人骨架 + RAM 清零毫秒數
+        drawSkeleton(ctx, rgb, w, h, cyan);
+        ctx.fillStyle = "rgba(16, 185, 129, 0.20)";
+        ctx.fillRect(12, 10, 460, 26);
+        ctx.strokeStyle = emerald;
+        ctx.strokeRect(12, 10, 460, 26);
+        ctx.fillStyle = "#6ee7b7";
+        ctx.font = "bold 12px monospace";
+        const isLiveL2 = snap.source_mode === "hybrid_live" && snap.live_camera_status && snap.live_camera_status.live_frame_seq > 0;
+        ctx.fillText(
+          (isLiveL2 ? "LIVE 實況骨架 | " : "L2 17點骨架向量 | ") +
+          "Volatile RAM 清零: " + snap.last_ram_wipe_ms.toFixed(3) + " ms (<100ms)",
+          20,
+          27
+        );
+      }
+
+      function drawSkeleton(ctx, rgb, w, h, strokeColor) {
+        if (!rgb || !rgb.skeleton_17pts || rgb.skeleton_17pts.length < 17) {
+          ctx.fillStyle = "#94a3b8";
+          ctx.font = "13px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("L2 推論完成：無人體骨架目標（純環境火焰／熱場語意分析）", w / 2, h / 2);
+          ctx.textAlign = "left";
+          return;
+        }
+        const pts = rgb.skeleton_17pts;
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = 3.2;
+        for (const [i, j] of COCO_EDGES) {
+          if (pts[i].conf < 0.25 || pts[j].conf < 0.25) continue;
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x * w, pts[i].y * h);
+          ctx.lineTo(pts[j].x * w, pts[j].y * h);
+          ctx.stroke();
+        }
+        for (const p of pts) {
+          if (p.conf < 0.25) continue;
+          ctx.beginPath();
+          ctx.arc(p.x * w, p.y * h, 4.5, 0, Math.PI * 2);
+          ctx.fillStyle = "#f8fafc";
+          ctx.fill();
+          ctx.strokeStyle = strokeColor;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+      }
+
+      function connectWebSocket() {
+        const proto = location.protocol === "https:" ? "wss:" : "ws:";
+        const wsUrl = proto + "//" + location.host + "/ws/telemetry";
+        const ws = new WebSocket(wsUrl);
+        state.ws = ws;
+
+        ws.onopen = () => {
+          document.getElementById("ws-dot").classList.remove("offline");
+          document.getElementById("ws-status-text").textContent = "LIVE WebSocket 8 Hz";
+        };
+        ws.onmessage = (evt) => {
+          const snap = JSON.parse(evt.data);
+          updateUI(snap);
+        };
+        ws.onclose = () => {
+          document.getElementById("ws-dot").classList.add("offline");
+          document.getElementById("ws-status-text").textContent = "重連中...";
+          setTimeout(connectWebSocket, 1500);
+        };
+      }
+
+      // Bind static buttons
+      document.getElementById("btn-theme-toggle").addEventListener("click", () => {
+        const html = document.documentElement;
+        const next = html.getAttribute("data-theme") === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", next);
+        document.getElementById("btn-theme-toggle").textContent =
+          next === "dark" ? "切換淺色模式" : "切換深色模式";
+        if (state.snapshot) updateUI(state.snapshot);
+      });
+
+      document.getElementById("btn-pause-stream").addEventListener("click", () => {
+        state.paused = !state.paused;
+        document.getElementById("btn-pause-stream").textContent = state.paused ? "恢復推送" : "暫停推送";
+        if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+          state.ws.send(state.paused ? "pause" : "resume");
+        }
+      });
+
+      document.getElementById("btn-stress-toggle").addEventListener("click", async () => {
+        state.stressEnabled = !state.stressEnabled;
+        const btn = document.getElementById("btn-stress-toggle");
+        btn.classList.toggle("btn-amber", state.stressEnabled);
+        btn.classList.toggle("active", state.stressEnabled);
+        btn.textContent = state.stressEnabled ? "解除 NPU 滿載模擬" : "模擬 NPU 滿載降級";
+        const snap = await apiPost("/api/stress/" + (state.stressEnabled ? "true" : "false"));
+        if (snap) updateUI(snap);
+      });
+
+      document.getElementById("btn-fast-forward").addEventListener("click", async () => {
+        const snap = await apiPost("/api/fast-forward/40");
+        if (snap) updateUI(snap);
+      });
+
+      document.getElementById("btn-l3-grant").addEventListener("click", async () => {
+        const op = document.getElementById("input-operator").value;
+        const otp = document.getElementById("input-otp").value;
+        const res = await apiPost("/api/l3/authorize", {
+          operator_id: op,
+          otp_token: otp,
+          action: "grant",
+          reason: "戰情室操作員雙因子授權啟封存證"
+        });
+        if (res && res.state) updateUI(res.state);
+      });
+
+      document.getElementById("btn-l3-revoke").addEventListener("click", async () => {
+        const op = document.getElementById("input-operator").value;
+        const otp = document.getElementById("input-otp").value;
+        const res = await apiPost("/api/l3/authorize", {
+          operator_id: op,
+          otp_token: otp,
+          action: "revoke",
+          reason: "現場警報確認處置完畢，退回 L1 非視覺守護"
+        });
+        if (res && res.state) updateUI(res.state);
+      });
+
+      // Bind mode, replay, evaluation & hybrid live webcam handlers
+      document.querySelectorAll("#mode-buttons .btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const mode = btn.dataset.mode;
+          const snap = await apiPost("/api/mode/" + mode);
+          if (snap) updateUI(snap);
+        });
+      });
+
+      document.getElementById("btn-load-track").addEventListener("click", async () => {
+        const tid = document.getElementById("select-replay-track").value;
+        if (!tid) return;
+        const snap = await apiPost("/api/replay/load/" + tid);
+        if (snap) updateUI(snap);
+      });
+
+      document.getElementById("btn-replay-play").addEventListener("click", async () => {
+        const curPlaying = state.snapshot && state.snapshot.replay_status ? state.snapshot.replay_status.playing : false;
+        const snap = await apiPost("/api/replay/control", { playing: !curPlaying });
+        if (snap) updateUI(snap);
+      });
+
+      document.getElementById("btn-replay-step").addEventListener("click", async () => {
+        const snap = await apiPost("/api/replay/control", { playing: false, step_once: true });
+        if (snap) updateUI(snap);
+      });
+
+      document.getElementById("select-replay-speed").addEventListener("change", async (e) => {
+        const snap = await apiPost("/api/replay/control", { speed: parseFloat(e.target.value) });
+        if (snap) updateUI(snap);
+      });
+
+      document.getElementById("replay-seek-slider").addEventListener("change", async (e) => {
+        const snap = await apiPost("/api/replay/control", { seek_index: parseInt(e.target.value, 10) });
+        if (snap) updateUI(snap);
+      });
+
+      document.getElementById("btn-upload-dataset").addEventListener("click", async () => {
+        const fileEl = document.getElementById("input-upload-file");
+        if (!fileEl.files || !fileEl.files.length) {
+          alert("請先選擇欲匯入的 CSV 或 JSONL 公開感測資料檔");
+          return;
+        }
+        const fd = new FormData();
+        fd.append("file", fileEl.files[0]);
+        fd.append("fmt", document.getElementById("select-upload-fmt").value);
+        fd.append("scenario_id", document.getElementById("select-upload-scen").value);
+
+        const res = await fetch("/api/replay/upload", { method: "POST", body: fd });
+        const data = await res.json();
+        if (!res.ok) {
+          alert(data.detail || "匯入資料集失敗");
+          return;
+        }
+        await loadCatalog();
+        if (data.state) updateUI(data.state);
+      });
+
+      document.getElementById("btn-run-eval").addEventListener("click", async () => {
+        const btn = document.getElementById("btn-run-eval");
+        btn.textContent = "計算批次評估中...";
+        const res = await apiPost("/api/replay/evaluate");
+        btn.textContent = "★ 一鍵產出高層批次評估報表";
+        if (!res || !res.summary) return;
+
+        const card = document.getElementById("eval-report-card");
+        card.style.display = "block";
+        const s = res.summary;
+        document.getElementById("eval-report-badge").textContent =
+          "已驗證 " + s.tracks_evaluated + " 軌跡 / " + s.total_frames + " 幀";
+
+        document.getElementById("eval-summary-grid").innerHTML =
+          "<div class='kpi-box'><div class='kpi-label'>整體分類準確率 / F1</div><div class='kpi-val mono' style='color:var(--emerald);'>" + s.accuracy_pct.toFixed(1) + "% / " + s.f1_score.toFixed(2) + "</div><div class='kpi-label mono'>Precision " + s.precision_pct + "% · Recall " + s.recall_pct + "%</div></div>" +
+          "<div class='kpi-box'><div class='kpi-label'>單模態 vs 四模態誤報</div><div class='kpi-val mono' style='color:var(--gold);'>" + s.single_modality_false_alarms + " → " + s.four_modality_false_alarms + "</div><div class='kpi-label mono'>誤報削減 " + s.far_reduction_pct.toFixed(1) + "%</div></div>" +
+          "<div class='kpi-box'><div class='kpi-label'>平均端對端延遲</div><div class='kpi-val mono' style='color:var(--cyan);'>" + s.avg_e2e_latency_ms.toFixed(1) + " ms</div><div class='kpi-label mono'>遠低於 500 ms 門檻</div></div>" +
+          "<div class='kpi-box'><div class='kpi-label'>平均 Volatile RAM 清零</div><div class='kpi-val mono' style='color:var(--emerald);'>" + s.avg_ram_wipe_ms.toFixed(3) + " ms</div><div class='kpi-label mono'>Zero Disk 100% Verified</div></div>" +
+          "<div class='kpi-box'><div class='kpi-label'>常態 (L0-L2) 頻寬節省</div><div class='kpi-val mono' style='color:var(--indigo);'>" + (s.standby_bandwidth_saving_pct || s.avg_bandwidth_saving_pct).toFixed(1) + "%</div><div class='kpi-label mono'>全段含 33% L3 存證平均 " + s.avg_bandwidth_saving_pct.toFixed(1) + "%</div></div>";
+
+        document.getElementById("eval-report-tbody").innerHTML = res.tracks.map((t) => {
+          const extra = t.b2_occupied_hold_rate_pct !== null
+            ? " | 零False-Off: " + t.b2_occupied_hold_rate_pct + "%"
+            : "";
+          return "<tr>" +
+            "<td><strong>[" + t.scenario_id + "]</strong> " + t.title + "</td>" +
+            "<td class='mono'>" + t.tp + " / " + t.fp + " / " + t.tn + " / " + t.fn + "</td>" +
+            "<td class='mono'>" + t.accuracy_pct + "% | " + t.precision_pct + "% | " + t.recall_pct + "% | " + t.f1_score.toFixed(2) + extra + "</td>" +
+            "<td class='mono'>" + t.single_modality_false_alarms + " → " + t.four_modality_false_alarms + " (降 " + t.far_reduction_pct + "%)</td>" +
+            "<td class='mono'>" + t.avg_e2e_latency_ms + " ms / " + t.avg_ram_wipe_ms.toFixed(3) + " ms</td>" +
+            "<td class='mono'>" + t.standby_bandwidth_saving_pct + "% (" + t.avg_bandwidth_saving_pct + "%)</td>" +
+            "</tr>";
+        }).join("");
+        card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+
+      document.getElementById("btn-close-eval").addEventListener("click", () => {
+        document.getElementById("eval-report-card").style.display = "none";
+      });
+
+      function stopBrowserWebcam() {
+        if (state.webcamTimer) {
+          clearInterval(state.webcamTimer);
+          state.webcamTimer = null;
+        }
+        if (state.webcamStream) {
+          state.webcamStream.getTracks().forEach((tr) => tr.stop());
+          state.webcamStream = null;
+        }
+        const vid = document.getElementById("live-video");
+        if (vid) vid.srcObject = null;
+        const btn = document.getElementById("btn-toggle-webcam");
+        if (btn) {
+          btn.textContent = "開啟瀏覽器實況鏡頭";
+          btn.classList.remove("active");
+        }
+      }
+
+      async function sendLiveCanvasFrame(forceBypassClientCheck) {
+        if (state.webcamUploading) return;
+        const lvl = state.snapshot ? state.snapshot.privacy_level : "L0";
+        if (!forceBypassClientCheck && lvl !== "L2" && lvl !== "L3") {
+          return;
+        }
+        const vid = document.getElementById("live-video");
+        const cnv = document.getElementById("live-grab-canvas");
+        const gctx = cnv.getContext("2d");
+        if (state.webcamStream && vid && vid.readyState >= 2) {
+          gctx.drawImage(vid, 0, 0, cnv.width, cnv.height);
+        } else {
+          // 若無瀏覽器相機串流卻點測試門禁，產生 1 幀合成測試影像送交後端驗證門禁
+          gctx.fillStyle = "#1e293b";
+          gctx.fillRect(0, 0, cnv.width, cnv.height);
+          gctx.fillStyle = "#e2e8f0";
+          gctx.fillRect(120, 40, 80, 160);
+        }
+        state.webcamUploading = true;
+        cnv.toBlob(async (blob) => {
+          gctx.clearRect(0, 0, cnv.width, cnv.height);
+          try {
+            if (!blob) return;
+            const fd = new FormData();
+            fd.append("file", blob, "frame.jpg");
+            const res = await fetch("/api/camera/frame", { method: "POST", body: fd });
+            if (res.ok) {
+              const out = await res.json();
+              if (out.state) updateUI(out.state);
+            }
+          } finally {
+            state.webcamUploading = false;
+          }
+        }, "image/jpeg", 0.72);
+      }
+
+      document.getElementById("btn-toggle-webcam").addEventListener("click", async () => {
+        const btn = document.getElementById("btn-toggle-webcam");
+        if (state.webcamStream) {
+          stopBrowserWebcam();
+          const snap = await apiPost("/api/camera/toggle", { enabled: false, source: "none" });
+          if (snap) updateUI(snap);
+          return;
+        }
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          alert("此瀏覽器環境不支援 getUserMedia，系統仍可透過「測試門禁」或後端 OpenCV 使用實況模擬。");
+          return;
+        }
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } });
+          state.webcamStream = stream;
+          const vid = document.getElementById("live-video");
+          vid.srcObject = stream;
+          await vid.play();
+          btn.textContent = "關閉瀏覽器實況鏡頭";
+          btn.classList.add("active");
+          const snap = await apiPost("/api/camera/toggle", { enabled: true, source: "browser_getusermedia" });
+          if (snap) updateUI(snap);
+          state.webcamTimer = setInterval(() => {
+            sendLiveCanvasFrame(false);
+          }, 380);
+        } catch (err) {
+          alert("無法取得瀏覽器攝影機權限：" + err.message);
+        }
+      });
+
+      document.getElementById("btn-test-gate-reject").addEventListener("click", async () => {
+        await apiPost("/api/mode/hybrid_live");
+        await sendLiveCanvasFrame(true);
+      });
+
+      async function boot() {
+        await loadCatalog();
+        const res = await fetch("/api/state");
+        const snap = await res.json();
+        updateUI(snap);
+        connectWebSocket();
+      }
+
+      boot();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.ultralytics/
+tests/
+scripts/
+datasets/uploaded/
+*.log
+run_server.py
+yolov8n-pose.pt

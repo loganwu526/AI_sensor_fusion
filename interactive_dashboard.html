@@ -1,0 +1,3344 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>四模態 AI 感測融合系統｜互動式工程與商業研究儀表板</title>
+  <style>
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+
+      --bg-body: #060a12;
+      --bg-gradient-1: rgba(14, 165, 233, 0.11);
+      --bg-gradient-2: rgba(16, 185, 129, 0.08);
+      --bg-surface: #0c1322;
+      --bg-card: #111b2e;
+      --bg-elevated: #17233b;
+      --bg-inset: #09101d;
+      --bg-header: rgba(6, 10, 18, 0.86);
+
+      --border-subtle: rgba(148, 163, 184, 0.14);
+      --border-strong: rgba(148, 163, 184, 0.28);
+
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+
+      --accent-cyan: #38bdf8;
+      --accent-indigo: #818cf8;
+      --accent-amber: #fb923c;
+      --accent-emerald: #34d399;
+      --accent-rose: #fb7185;
+      --accent-gold: #fbbf24;
+
+      --cyan-soft: rgba(56, 189, 248, 0.14);
+      --indigo-soft: rgba(129, 140, 248, 0.14);
+      --amber-soft: rgba(251, 146, 60, 0.14);
+      --emerald-soft: rgba(52, 211, 153, 0.14);
+      --rose-soft: rgba(251, 113, 133, 0.14);
+      --gold-soft: rgba(251, 191, 36, 0.14);
+
+      --shadow-card: 0 12px 32px -12px rgba(0, 0, 0, 0.65);
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+      --transition-fast: 180ms cubic-bezier(0.22, 1, 0.36, 1);
+      --transition-med: 320ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    html[data-theme="light"] {
+      --bg-body: #f1f5f9;
+      --bg-gradient-1: rgba(2, 132, 199, 0.08);
+      --bg-gradient-2: rgba(5, 150, 105, 0.07);
+      --bg-surface: #ffffff;
+      --bg-card: #ffffff;
+      --bg-elevated: #f8fafc;
+      --bg-inset: #eef2f7;
+      --bg-header: rgba(255, 255, 255, 0.88);
+
+      --border-subtle: rgba(15, 23, 42, 0.10);
+      --border-strong: rgba(15, 23, 42, 0.22);
+
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+
+      --accent-cyan: #0284c7;
+      --accent-indigo: #4f46e5;
+      --accent-amber: #ea580c;
+      --accent-emerald: #059669;
+      --accent-rose: #e11d48;
+      --accent-gold: #d97706;
+
+      --cyan-soft: rgba(2, 132, 199, 0.11);
+      --indigo-soft: rgba(79, 70, 229, 0.11);
+      --amber-soft: rgba(234, 88, 12, 0.11);
+      --emerald-soft: rgba(5, 150, 105, 0.11);
+      --rose-soft: rgba(225, 29, 72, 0.11);
+      --gold-soft: rgba(217, 119, 6, 0.11);
+
+      --shadow-card: 0 10px 28px -10px rgba(15, 23, 42, 0.10);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background-color: var(--bg-body);
+      background-image:
+        radial-gradient(circle at 12% 8%, var(--bg-gradient-1), transparent 42%),
+        radial-gradient(circle at 88% 12%, var(--bg-gradient-2), transparent 42%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color var(--transition-med), color var(--transition-med);
+    }
+
+    .mono {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .num {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Header & Navigation */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      background: var(--bg-header);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .topbar-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, var(--cyan-soft), var(--indigo-soft));
+      border: 1px solid var(--border-strong);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      color: var(--accent-cyan);
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      margin: 0;
+      color: var(--text-primary);
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin: 2px 0 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .topbar-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav-pills {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      background: var(--bg-inset);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .nav-pill {
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    .nav-pill:hover {
+      color: var(--text-primary);
+      background: var(--bg-elevated);
+    }
+
+    .nav-pill.active {
+      background: var(--accent-cyan);
+      color: #031525;
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.35);
+    }
+
+    html[data-theme="light"] .nav-pill.active {
+      color: #ffffff;
+    }
+
+    .theme-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--border-strong);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .theme-btn:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-1px);
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px 24px 64px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* Hero KPI Strip */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+      transition: transform var(--transition-fast), border-color var(--transition-fast);
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-strong);
+    }
+
+    .kpi-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      background: var(--kpi-accent, var(--accent-cyan));
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .kpi-value {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+    }
+
+    .kpi-meta {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* Module Cards */
+    .module-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      scroll-margin-top: 84px;
+    }
+
+    .module-section.hidden-module {
+      display: none;
+    }
+
+    .module-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 18px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .module-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      background: var(--cyan-soft);
+      padding: 3px 9px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+
+    .module-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .module-desc {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--text-secondary);
+      max-width: 780px;
+    }
+
+    /* Shared Badges & Buttons */
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .btn-chip {
+      border: 1px solid var(--border-strong);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 7px 13px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .btn-chip:hover {
+      color: var(--text-primary);
+      border-color: var(--accent-cyan);
+    }
+
+    .btn-chip.active {
+      background: var(--cyan-soft);
+      color: var(--accent-cyan);
+      border-color: var(--accent-cyan);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .badge-cyan { background: var(--cyan-soft); color: var(--accent-cyan); }
+    .badge-indigo { background: var(--indigo-soft); color: var(--accent-indigo); }
+    .badge-amber { background: var(--amber-soft); color: var(--accent-amber); }
+    .badge-emerald { background: var(--emerald-soft); color: var(--accent-emerald); }
+    .badge-rose { background: var(--rose-soft); color: var(--accent-rose); }
+    .badge-gold { background: var(--gold-soft); color: var(--accent-gold); }
+    .badge-muted { background: var(--bg-elevated); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
+
+    /* Module 1: Quad-Modality Simulator */
+    .m1-grid {
+      display: grid;
+      grid-template-columns: 1.02fr 1.18fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .modality-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .mod-toggle-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      user-select: none;
+    }
+
+    .mod-toggle-card:hover {
+      border-color: var(--border-strong);
+      background: var(--bg-elevated);
+    }
+
+    .mod-toggle-card.on {
+      border-color: var(--mod-color, var(--accent-cyan));
+      box-shadow: inset 3px 0 0 var(--mod-color, var(--accent-cyan));
+    }
+
+    .mod-toggle-card:not(.on) {
+      opacity: 0.72;
+    }
+
+    .mod-left {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .mod-icon-box {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      color: var(--mod-color, var(--accent-cyan));
+    }
+
+    .mod-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .mod-sub {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin: 3px 0 6px;
+    }
+
+    .mod-specs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .switch {
+      position: relative;
+      width: 46px;
+      height: 26px;
+      border-radius: 999px;
+      background: var(--bg-inset);
+      border: 1px solid var(--border-strong);
+      flex-shrink: 0;
+      transition: all var(--transition-fast);
+      margin-top: 2px;
+    }
+
+    .switch::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: transform var(--transition-fast), background-color var(--transition-fast);
+    }
+
+    .mod-toggle-card.on .switch {
+      background: var(--mod-color, var(--accent-cyan));
+      border-color: var(--mod-color, var(--accent-cyan));
+    }
+
+    .mod-toggle-card.on .switch::after {
+      transform: translateX(20px);
+      background: #ffffff;
+    }
+
+    .blindspot-panel {
+      margin-top: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 15px 16px;
+    }
+
+    .blindspot-panel.status-ok {
+      border-color: var(--accent-emerald);
+      background: linear-gradient(135deg, var(--emerald-soft), transparent);
+    }
+
+    .blindspot-panel.status-warn {
+      border-color: var(--accent-amber);
+      background: linear-gradient(135deg, var(--amber-soft), transparent);
+    }
+
+    .blindspot-panel.status-danger {
+      border-color: var(--accent-rose);
+      background: linear-gradient(135deg, var(--rose-soft), transparent);
+    }
+
+    .blindspot-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      margin: 0 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .blindspot-list {
+      margin: 0;
+      padding-left: 18px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .radar-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .radar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .radar-svg-wrap {
+      width: 100%;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .radar-svg-wrap svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .radar-poly {
+      transition: all 340ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .dim-scores-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .dim-score-box {
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .dim-score-val {
+      font-weight: 800;
+      color: var(--accent-cyan);
+    }
+
+    .unlock-panel {
+      margin-top: 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+    }
+
+    .unlock-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .unlock-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .unlock-item {
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      background: var(--bg-inset);
+      transition: all var(--transition-fast);
+    }
+
+    .unlock-item.full {
+      border-color: var(--accent-emerald);
+      background: linear-gradient(180deg, var(--emerald-soft), var(--bg-inset));
+    }
+
+    .unlock-item.partial {
+      border-color: var(--accent-amber);
+      background: linear-gradient(180deg, var(--amber-soft), var(--bg-inset));
+    }
+
+    .unlock-item.locked {
+      opacity: 0.48;
+    }
+
+    .unlock-item-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .unlock-item-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .unlock-item-note {
+      font-size: 11px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* Module 2: Applications Matrix & Top 5 */
+    .m2-controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .sort-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+    }
+
+    .select-input {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-sm);
+      padding: 7px 11px;
+      font-family: var(--font-sans);
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--bg-card);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    th, td {
+      padding: 11px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+      vertical-align: middle;
+    }
+
+    th {
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      font-weight: 700;
+      font-size: 11.5px;
+      white-space: nowrap;
+    }
+
+    tr.app-row {
+      cursor: pointer;
+      transition: background-color var(--transition-fast);
+    }
+
+    tr.app-row:hover {
+      background: var(--bg-elevated);
+    }
+
+    tr.app-row.selected-row {
+      background: var(--cyan-soft);
+    }
+
+    .score-pill-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 72px;
+    }
+
+    .mini-track {
+      width: 36px;
+      height: 5px;
+      border-radius: 999px;
+      background: var(--bg-inset);
+      overflow: hidden;
+    }
+
+    .mini-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--accent-cyan);
+    }
+
+    .app-inspector {
+      margin-top: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--accent-cyan);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+    }
+
+    .top5-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 26px 0 14px;
+    }
+
+    .top5-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .flagship-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: border-color var(--transition-fast);
+    }
+
+    .flagship-card.expanded {
+      border-color: var(--accent-cyan);
+    }
+
+    .flagship-trigger {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: var(--text-primary);
+      padding: 16px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      text-align: left;
+      font-family: var(--font-sans);
+    }
+
+    .flagship-trigger:hover {
+      background: var(--bg-elevated);
+    }
+
+    .flagship-rank {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 13px;
+      background: var(--gold-soft);
+      color: var(--accent-gold);
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      flex-shrink: 0;
+    }
+
+    .flagship-body {
+      display: none;
+      padding: 0 18px 18px;
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-inset);
+    }
+
+    .flagship-card.expanded .flagship-body {
+      display: block;
+    }
+
+    .flagship-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .detail-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+
+    .detail-box h4 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .detail-box ul {
+      margin: 0;
+      padding-left: 17px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .modality-role-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .modality-role-item {
+      padding: 6px 9px;
+      border-radius: 6px;
+      background: var(--bg-inset);
+      border-left: 3px solid var(--role-color, var(--accent-cyan));
+    }
+
+    /* Module 3: Privacy-by-Design Simulator */
+    .scenario-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .scenario-btn {
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border-radius: var(--radius-md);
+      padding: 13px 14px;
+      cursor: pointer;
+      text-align: left;
+      font-family: var(--font-sans);
+      transition: all var(--transition-fast);
+      position: relative;
+    }
+
+    .scenario-btn:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+
+    .scenario-btn.active {
+      border-color: var(--sc-color, var(--accent-cyan));
+      background: linear-gradient(135deg, var(--sc-soft, var(--cyan-soft)), var(--bg-card));
+      box-shadow: 0 4px 18px -6px rgba(56, 189, 248, 0.35);
+    }
+
+    .scenario-level {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: var(--sc-color, var(--accent-cyan));
+      margin-bottom: 4px;
+    }
+
+    .scenario-name {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .flow-diagram-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 18px;
+      overflow-x: auto;
+    }
+
+    .flow-svg {
+      width: 100%;
+      min-width: 720px;
+      height: auto;
+      display: block;
+    }
+
+    @keyframes dashFlow {
+      to {
+        stroke-dashoffset: -24;
+      }
+    }
+
+    .flow-line-active {
+      stroke-dasharray: 6 6;
+      animation: dashFlow 0.9s linear infinite;
+    }
+
+    .m3-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .sensor-state-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+    }
+
+    .sensor-state-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .telemetry-split {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 16px;
+    }
+
+    .meter-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .meter-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .meter-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 12.5px;
+    }
+
+    .meter-bar-track {
+      height: 10px;
+      border-radius: 999px;
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .meter-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 380ms cubic-bezier(0.22, 1, 0.36, 1), background-color 280ms ease;
+    }
+
+    .latency-stages {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .stage-box {
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      border-radius: 7px;
+      padding: 7px 8px;
+      font-size: 11px;
+    }
+
+    .retention-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    /* Module 4: Deployment & BOM Calculator */
+    .m4-controls {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .control-group {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+    }
+
+    .control-group-label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .segmented {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .seg-btn {
+      flex: 1 1 auto;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-inset);
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 8px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      text-align: center;
+    }
+
+    .seg-btn:hover {
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    .seg-btn.active {
+      background: var(--accent-cyan);
+      color: #031525;
+      border-color: var(--accent-cyan);
+      font-weight: 700;
+    }
+
+    html[data-theme="light"] .seg-btn.active {
+      color: #ffffff;
+    }
+
+    .bom-summary-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .bom-stat {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+    }
+
+    .bom-stat.highlight {
+      border-color: var(--accent-emerald);
+      background: linear-gradient(135deg, var(--emerald-soft), var(--bg-card));
+    }
+
+    .m4-main-grid {
+      display: grid;
+      grid-template-columns: 1.12fr 0.88fr;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .bom-chart-card, .chip-list-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+    }
+
+    .bom-bars {
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      margin-top: 12px;
+    }
+
+    .bom-bar-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bom-bar-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .bom-bar-track {
+      height: 11px;
+      border-radius: 999px;
+      background: var(--bg-inset);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .bom-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .chip-spec-item {
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-inset);
+      border: 1px solid var(--border-subtle);
+      margin-top: 9px;
+    }
+
+    .deploy-compare-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .deploy-dim-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 13px;
+    }
+
+    .deploy-side {
+      padding: 7px 9px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-top: 6px;
+      border: 1px solid transparent;
+    }
+
+    .deploy-side.focused {
+      border-color: var(--accent-cyan);
+      background: var(--cyan-soft);
+    }
+
+    .deploy-side:not(.focused) {
+      background: var(--bg-inset);
+      opacity: 0.78;
+    }
+
+    .roi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .roi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 15px;
+    }
+
+    .roi-card.focused {
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 0 1px var(--accent-gold);
+    }
+
+    .callout {
+      margin-top: 12px;
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-inset);
+      border-left: 3px solid var(--accent-amber);
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .footer {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px 36px;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 1120px) {
+      .kpi-grid, .bom-summary-strip, .m3-metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .m1-grid, .telemetry-split, .m4-main-grid {
+        grid-template-columns: 1fr;
+      }
+      .m4-controls, .deploy-compare-grid, .roi-grid {
+        grid-template-columns: 1fr;
+      }
+      .scenario-tabs {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .unlock-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .latency-stages {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 680px) {
+      .container {
+        padding: 16px 14px 48px;
+      }
+      .module-section {
+        padding: 16px;
+      }
+      .kpi-grid, .bom-summary-strip, .m3-metrics-grid, .scenario-tabs, .unlock-grid, .flagship-grid, .dim-scores-grid {
+        grid-template-columns: 1fr;
+      }
+      .brand-sub {
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">四模態 AI 感測融合系統｜研究決策儀表板</h1>
+          <p class="brand-sub">ISAC 通感一體化（Wi-Fi 7 / 802.11bf / BLE / UWB × IP Camera × Thermal VOx × mmWave Radar）</p>
+        </div>
+      </div>
+
+      <div class="topbar-controls">
+        <nav class="nav-pills" aria-label="模組導覽">
+          <button class="nav-pill active" data-view="all">全部總覽</button>
+          <button class="nav-pill" data-view="mod-1">01 融合模擬</button>
+          <button class="nav-pill" data-view="mod-2">02 應用與 Top 5</button>
+          <button class="nav-pill" data-view="mod-3">03 隱私喚醒</button>
+          <button class="nav-pill" data-view="mod-4">04 部署與 BOM</button>
+        </nav>
+        <button class="theme-btn" id="themeToggleBtn" type="button" aria-label="切換深淺色主題">
+          <span id="themeIcon">☀</span>
+          <span id="themeLabel">淺色模式</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- KPI Summary Strip -->
+    <section class="kpi-grid" aria-label="核心研究指標摘要">
+      <div class="kpi-card" style="--kpi-accent: var(--accent-cyan);">
+        <div class="kpi-label"><span>跨領域融合應用矩陣</span><span class="badge badge-cyan">Ch.1</span></div>
+        <div class="kpi-value num">15 場域 / Top 5</div>
+        <div class="kpi-meta">旗艦 #1 銀髮衛浴守護加權評分 <strong class="num">93.3 / 100</strong></div>
+      </div>
+      <div class="kpi-card" style="--kpi-accent: var(--accent-emerald);">
+        <div class="kpi-label"><span>端對端關鍵告警延遲</span><span class="badge badge-emerald">Ch.2</span></div>
+        <div class="kpi-value num">110–205 ms</div>
+        <div class="kpi-meta">預熱最佳路徑；標準逐級喚醒 <strong class="num">250–420 ms</strong></div>
+      </div>
+      <div class="kpi-card" style="--kpi-accent: var(--accent-indigo);">
+        <div class="kpi-label"><span>Privacy-by-Design 節省</span><span class="badge badge-indigo">L0→L3</span></div>
+        <div class="kpi-value num">&gt;95% 頻寬</div>
+        <div class="kpi-meta">L0 增量僅 <strong class="num">0.3–0.8 W</strong>｜L2 影像 RAM <strong class="num">&lt;100 ms</strong> 銷毀</div>
+      </div>
+      <div class="kpi-card" style="--kpi-accent: var(--accent-amber);">
+        <div class="kpi-label"><span>三階 All-in-One BOM</span><span class="badge badge-amber">Ch.3</span></div>
+        <div class="kpi-value num">$61.8–$3,695</div>
+        <div class="kpi-meta">採分散式套件單房/點位可再降 <strong class="num">25%–40%</strong></div>
+      </div>
+    </section>
+
+    <!-- MODULE 1: Quad-Modality Fusion Simulator -->
+    <section class="module-section" id="mod-1">
+      <div class="module-header">
+        <div>
+          <span class="module-kicker">Module 01 · 物理互補閉環</span>
+          <h2 class="module-title">四模態融合模擬器（能力雷達 × 應用解鎖 × 盲區警示）</h2>
+          <p class="module-desc">自由切換四類感測與網通節點，即時觀測 6 維度系統能力變化、已解鎖之 15 項跨領域應用，以及源自第 1.3 節分析的殘餘工程盲區。</p>
+        </div>
+        <div class="chip-row" id="m1Presets">
+          <button class="btn-chip active" data-preset="all">全四模態閉環</button>
+          <button class="btn-chip" data-preset="nonvisual">非視覺照護 (Wi-Fi+Radar+Thermal)</button>
+          <button class="btn-chip" data-preset="dual_opt">傳統雙光 (Camera+Thermal)</button>
+          <button class="btn-chip" data-preset="wifi_cam">Wi-Fi CSI + Camera</button>
+          <button class="btn-chip" data-preset="wifi_radar">Wi-Fi + mmWave</button>
+          <button class="btn-chip" data-preset="none">全部關閉</button>
+        </div>
+      </div>
+
+      <div class="m1-grid">
+        <div>
+          <div class="modality-list" id="modalityToggleList"></div>
+          <div class="blindspot-panel" id="blindspotPanel"></div>
+        </div>
+
+        <div class="radar-panel">
+          <div class="radar-header">
+            <div>
+              <strong style="font-size:14px;">6 維度融合能力雷達圖（0–10 分基準）</strong>
+              <div style="font-size:12px;color:var(--text-secondary);">虛線為全四模態理想基準；實線為當前啟用組合表現</div>
+            </div>
+            <span class="badge badge-cyan num" id="activeCountBadge">已啟用 4 / 4 模態</span>
+          </div>
+          <div class="radar-svg-wrap" id="radarSvgWrap"></div>
+          <div class="dim-scores-grid" id="dimScoresGrid"></div>
+        </div>
+      </div>
+
+      <div class="unlock-panel">
+        <div class="unlock-top">
+          <div>
+            <strong style="font-size:14.5px;">當前感測組合可支撐之跨領域應用場景清單（共 15 項）</strong>
+            <div style="font-size:12px;color:var(--text-secondary);">區分「完全無盲區四模態閉環」與「核心觸發已滿足但仍具工程/法規缺口之基礎解鎖」</div>
+          </div>
+          <div class="chip-row">
+            <span class="badge badge-emerald num" id="fullUnlockBadge">完整閉環：15 / 15</span>
+            <span class="badge badge-amber num" id="basicUnlockBadge">總已解鎖：15 / 15</span>
+          </div>
+        </div>
+        <div class="unlock-grid" id="unlockGrid"></div>
+      </div>
+    </section>
+
+    <!-- MODULE 2: Cross-Domain Applications & Top 5 Flagships -->
+    <section class="module-section" id="mod-2">
+      <div class="module-header">
+        <div>
+          <span class="module-kicker">Module 02 · 場域全景與評分矩陣</span>
+          <h2 class="module-title">跨領域 15 項應用探索 &amp; Top 5 旗艦深度卡片</h2>
+          <p class="module-desc">依市場剛需 (25%)、技術不可替代性 (25%)、隱私法規優勢 (20%)、商業 ROI (15%) 與落地可行性 (15%) 量化加權排序；點擊任一列可檢視協同角色。</p>
+        </div>
+      </div>
+
+      <div class="m2-controls">
+        <div class="chip-row" id="domainFilters">
+          <button class="btn-chip active" data-domain="all">全部領域 (15)</button>
+          <button class="btn-chip" data-domain="care">智慧照護與醫療 (4)</button>
+          <button class="btn-chip" data-domain="security">智慧安防與建築 (4)</button>
+          <button class="btn-chip" data-domain="factory">智慧工廠與工安 (4)</button>
+          <button class="btn-chip" data-domain="infra">交通與能源基建 (3)</button>
+        </div>
+        <div class="sort-box">
+          <label for="appSortSelect">排序依據：</label>
+          <select id="appSortSelect" class="select-input">
+            <option value="total">加權總分（高 → 低）</option>
+            <option value="need">市場剛需 (25%)</option>
+            <option value="tech">技術不可替代性 (25%)</option>
+            <option value="privacy">隱私法規優勢 (20%)</option>
+            <option value="roi">商業 ROI (15%)</option>
+            <option value="feasibility">落地可行性 (15%)</option>
+            <option value="code">編號順序 (A1 → D3)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>排名</th>
+              <th>編號</th>
+              <th>領域</th>
+              <th>融合應用名稱</th>
+              <th>市場剛需<br>(25%)</th>
+              <th>技術互補<br>(25%)</th>
+              <th>隱私優勢<br>(20%)</th>
+              <th>商業 ROI<br>(15%)</th>
+              <th>落地可行<br>(15%)</th>
+              <th>加權總分</th>
+              <th>旗艦評定</th>
+            </tr>
+          </thead>
+          <tbody id="appsTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="app-inspector" id="appInspector"></div>
+
+      <div class="top5-header-bar">
+        <div>
+          <h3 style="margin:0;font-size:16.5px;">Top 5 旗艦應用深度剖析（點擊展開／收合四維深度報告）</h3>
+          <p style="margin:3px 0 0;font-size:12.5px;color:var(--text-secondary);">涵蓋單/雙模態失效痛點、四模態具體分工、L0→L3 隱私觸發流程與量化效益指標</p>
+        </div>
+        <div class="chip-row">
+          <button class="btn-chip" id="expandAllTop5Btn" type="button">全部展開</button>
+          <button class="btn-chip" id="collapseAllTop5Btn" type="button">全部收合</button>
+        </div>
+      </div>
+
+      <div class="top5-list" id="top5List"></div>
+    </section>
+
+    <!-- MODULE 3: Privacy-by-Design Tiered Wakeup Simulator -->
+    <section class="module-section" id="mod-3">
+      <div class="module-header">
+        <div>
+          <span class="module-kicker">Module 03 · 四階隱私狀態機</span>
+          <h2 class="module-title">Privacy-by-Design 分級喚醒互動模擬（L0 → L3）</h2>
+          <p class="module-desc">實踐「預設不開鏡」、「TEE Volatile RAM 揮發隔離不落盤」、「AES-256-GCM 雙重授權託管」三大鐵律，切換情境以檢視即時感測態、雙口徑頻寬與功耗、端到端延遲及留存策略。</p>
+        </div>
+      </div>
+
+      <div class="scenario-tabs" id="scenarioTabs"></div>
+
+      <div class="flow-diagram-box">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+          <strong style="font-size:13.5px;">即時訊號流向與隱私閘控拓撲（SVG 動態節點流向圖）</strong>
+          <span class="badge badge-cyan" id="flowStateBadge">L0 常駐極低功耗模式</span>
+        </div>
+        <div id="flowSvgContainer"></div>
+      </div>
+
+      <div class="m3-metrics-grid" id="sensorStatesGrid"></div>
+
+      <div class="telemetry-split">
+        <div class="meter-card" id="telemetryMetersCard"></div>
+        <div class="retention-card" id="retentionPolicyCard"></div>
+      </div>
+    </section>
+
+    <!-- MODULE 4: Deployment Comparison & 3-Tier BOM Calculator -->
+    <section class="module-section" id="mod-4">
+      <div class="module-header">
+        <div>
+          <span class="module-kicker">Module 04 · 硬體架構與經濟模型</span>
+          <h2 class="module-title">部署形態對比 &amp; 三階 BOM 試算器</h2>
+          <p class="module-desc">動態比較 All-in-One 吸頂/壁掛節點與分散式多節點協同在 RF/EMI、熱漂移、PoE 瓦數與利舊上的取捨，並按三價位帶與 NDAA 合規路線拆解晶片選型與分項成本。</p>
+        </div>
+      </div>
+
+      <div class="m4-controls">
+        <div class="control-group">
+          <div class="control-group-label">1. 部署形態選擇</div>
+          <div class="segmented" id="deployModeToggle">
+            <button class="seg-btn active" data-deploy="aio">All-in-One 吸頂/壁掛節點</button>
+            <button class="seg-btn" data-deploy="dist">分散式多節點協同</button>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="control-group-label">2. 硬體價位帶（Tier 1 – 3）</div>
+          <div class="segmented" id="tierToggle">
+            <button class="seg-btn" data-tier="t1">Tier 1 入門商用</button>
+            <button class="seg-btn active" data-tier="t2">Tier 2 中高階商用</button>
+            <button class="seg-btn" data-tier="t3">Tier 3 工業/基建</button>
+          </div>
+        </div>
+        <div class="control-group">
+          <div class="control-group-label">3. 供應鏈與合規路線</div>
+          <div class="segmented" id="complianceToggle">
+            <button class="seg-btn active" data-comp="std">標準 / 高性價比方案</button>
+            <button class="seg-btn" data-comp="ndaa">NDAA 合規 / 西方旗艦方案</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bom-summary-strip" id="bomSummaryStrip"></div>
+
+      <div class="m4-main-grid">
+        <div class="bom-chart-card" id="bomChartCard"></div>
+        <div class="chip-list-card" id="chipListCard"></div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <h3 style="margin:0 0 4px;font-size:15.5px;">兩大部署形態六維工程取捨對比（已鎖定高亮目前所選形態）</h3>
+        <p style="margin:0;font-size:12.5px;color:var(--text-secondary);">依據第 2.5 節工程剖析：比較 RF/EMI、VOx 熱漂移、IEEE 802.3 PoE 供電瓶頸、幾何視角衝突、標定工時與既有設備利舊</p>
+        <div class="deploy-compare-grid" id="deployCompareGrid"></div>
+      </div>
+
+      <div style="margin-top:22px;">
+        <h3 style="margin:0 0 4px;font-size:15.5px;">商業定價、毛利結構與典型場域 ROI 回本週期參考（第 3.3 節）</h3>
+        <p style="margin:0;font-size:12.5px;color:var(--text-secondary);">綜合混合毛利率（硬體 ＋ 3 年 SaaS 續約）：第 1 年 <strong class="num">46%</strong> → 第 3 年累計 <strong class="num">64%–72%</strong>（軟體 SaaS 毛利率 <strong class="num">78%–86%</strong>）</p>
+        <div class="roi-grid" id="roiGrid"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>單檔自包含離線研究儀表板｜無任何外部 CDN 請求，純原生 HTML5 + CSS3 + Vanilla JS + SVG 實作</span>
+    <span>數據嚴格對齊：<span class="mono">01_applications_and_matrix.md</span> · <span class="mono">02_technical_architecture.md</span> · <span class="mono">03_market_bom_gtm.md</span></span>
+  </footer>
+
+  <script>
+    (function () {
+      "use strict";
+
+      /* =========================================================================
+       * 1. DATA GROUNDED IN 01, 02, 03 RESEARCH REPORTS
+       * ========================================================================= */
+
+      const MODALITIES = [
+        {
+          id: "wifi",
+          name: "無線網路設備 (Wi-Fi 7 / 802.11bf / BLE / UWB)",
+          shortName: "無線網路設備",
+          color: "var(--accent-cyan)",
+          hex: "#38bdf8",
+          sub: "三重角色：高速骨幹 (MLO/PoE++) × Edge AI 匯流中樞 × RF 物理感知",
+          specs: ["穿牆 Sub-7GHz 80–150 m²", "BLE AoA 0.3–1.0 m", "UWB 10–30 cm", "CSI 邊際感測功耗極低"],
+          vector: { spatial: 3.5, penetration: 9.5, vitals: 5.5, thermal: 0.0, privacy: 9.5, coverage: 9.5 },
+          icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>'
+        },
+        {
+          id: "camera",
+          name: "IP Camera (RGB / Starlight / IR-Cut)",
+          shortName: "IP Camera",
+          color: "var(--accent-emerald)",
+          hex: "#34d399",
+          sub: "1080p–4K CMOS 視覺語意辨識：人臉、車牌、工裝合規與法律取證",
+          specs: ["語意/空間極高", "常態 3–5W / IR 8–12W+", "H.265 4K 4–8 Mbps", "需 L0–L3 控管隱私"],
+          vector: { spatial: 9.8, penetration: 2.0, vitals: 1.5, thermal: 2.0, privacy: 1.5, coverage: 8.0 },
+          icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>'
+        },
+        {
+          id: "thermal",
+          name: "Thermal Sensor (遠紅外線 LWIR VOx 熱成像)",
+          shortName: "Thermal 熱像",
+          color: "var(--accent-amber)",
+          hex: "#fb923c",
+          sub: "非製冷微測輻射熱計 (8–14 µm)：絕對輻射測溫、早期火災與體溫篩檢",
+          specs: ["NETD <40–50 mK", "Lepton 3.5 +400°C", "0 Lux / 霧室 MOR 13m ≥90%", "無法穿玻璃/牆壁"],
+          vector: { spatial: 5.8, penetration: 6.5, vitals: 5.5, thermal: 9.8, privacy: 7.8, coverage: 5.0 },
+          icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>'
+        },
+        {
+          id: "radar",
+          name: "mmWave Radar (60GHz / 77GHz FMCW 4D)",
+          shortName: "mmWave 雷達",
+          color: "var(--accent-indigo)",
+          hex: "#818cf8",
+          sub: "3D/4D 點雲與微多普勒：穿透濃煙/水蒸氣、亞毫米胸腔呼吸與心跳",
+          specs: ["呼吸 ±1–2 rpm / 心率 ±5 bpm", "IWRL6432 <1.15 mW", "100% 無視覺隱私", "濃煙/全暗零衰減"],
+          vector: { spatial: 6.8, penetration: 8.8, vitals: 9.6, thermal: 0.0, privacy: 9.6, coverage: 7.2 },
+          icon: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="2"/><path d="M12 2a10 10 0 0 1 10 10"/><path d="M12 6a6 6 0 0 1 6 6"/><path d="M12 12l6-6"/></svg>'
+        }
+      ];
+
+      const RADAR_AXES = [
+        { key: "spatial", label: "空間與語意精度" },
+        { key: "penetration", label: "穿牆/暗/煙霧穿透力" },
+        { key: "vitals", label: "生命徵象感知" },
+        { key: "thermal", label: "熱異常與早期火災" },
+        { key: "privacy", label: "隱私友善度" },
+        { key: "coverage", label: "單節點覆蓋成本比" }
+      ];
+
+      const APPLICATIONS = [
+        {
+          rank: 1, code: "A1", domain: "care", domainLabel: "智慧照護／醫療",
+          name: "銀髮居家與長照衛浴／臥室零穿戴跌倒與生命徵象守護",
+          shortName: "銀髮居家／長照衛浴零穿戴跌倒守護",
+          need: 9.6, tech: 9.2, privacy: 9.8, roi: 8.8, feasibility: 9.0, total: 93.3, flagship: 1,
+          minReq: ["radar", "thermal"], fullReq: ["wifi", "radar", "thermal", "camera"],
+          trigger: "長者拒戴穿戴裝置（未依規配戴率高達 23%）、衛浴/臥室禁用攝影機、慢速滑倒與離床失蹤。",
+          value: "兼顧 100% 衛浴隱私合規與低誤報率，消除護理站 80%–99% 警報疲勞。",
+          roles: {
+            wifi: "AP/802.11bf：跨房移動與夜間離床超過設定時間偵測，並作邊緣中樞喚醒局部節點",
+            radar: "60GHz mmWave：衛浴/床邊穿透水蒸氣與棉被擷取 3D 跌倒軌跡與亞毫米胸腔呼吸心跳",
+            thermal: "VOx 熱陣列：交叉驗證 34°C–37°C 人體體熱輪廓，瞬間排除掉落棉被/寵物誤報並測發燒",
+            camera: "IP Camera：平時物理/邏輯休眠；L3 重度跌倒或無呼吸危急確認時始開啟加密視訊與雙向關懷"
+          }
+        },
+        {
+          rank: 2, code: "C4", domain: "factory", domainLabel: "智慧工廠／工安",
+          name: "鋰電池儲能站（BESS）／EV 超充站熱失控截斷與濃煙搜救",
+          shortName: "儲能站（BESS）／EV 超充熱失控截斷與搜救",
+          need: 9.8, tech: 9.6, privacy: 7.6, roi: 9.5, feasibility: 8.6, total: 90.9, flagship: 2,
+          minReq: ["thermal", "camera", "radar"], fullReq: ["wifi", "thermal", "radar", "camera"],
+          trigger: "鋰電池熱失控 Stage 1–2 早於明火；開放場域氣流稀釋煙霧使煙感延遲；起火後濃煙蔽日。",
+          value: "起火前數分鐘自動切斷充電/BMS 負載阻斷連鎖反應，災時濃煙中維持 >90% 人員搜救可視率。",
+          roles: {
+            wifi: "Wi-Fi 7 / 5G 閘道：無外網盲區下毫秒級連動 BMS 與充電樁斷電跳脫，推送搜救點雲",
+            radar: "60/77GHz 4D 雷達：斷電/滅火前確認人員撤離；Stage 3 濃黑煙全盲下穿透定位受困者座標",
+            thermal: "測溫型 VOx：24/7 掃描電池櫃/充電槍異常升溫（>70°C 或 ΔT/Δt 異常），比煙感早數分鐘預警",
+            camera: "4K WDR 視覺：辨識車牌與插槍狀態，區分「煞車碟盤/陽光反光」與「電池包真熱點」"
+          }
+        },
+        {
+          rank: 3, code: "B1", domain: "security", domainLabel: "智慧安防／建築",
+          name: "關鍵園區與倉儲全天候零誤報周界入侵偵測",
+          shortName: "關鍵園區／倉儲全天候零誤報周界入侵",
+          need: 8.8, tech: 8.8, privacy: 8.4, roi: 9.0, feasibility: 9.2, total: 88.1, flagship: 3,
+          minReq: ["radar", "thermal"], fullReq: ["wifi", "radar", "thermal", "camera"],
+          trigger: "夜間強光眩光、暴雨濃霧、流浪動物（狐/貓/鳥）及搖晃樹影造成傳統 PIR/CCTV 每日 20–50 次誤報。",
+          value: "綜合誤報降至每百米每月 <1–2 次（降 >98%），省夜間頻寬 >90%，初期硬體較高階雙光降 40%–60%。",
+          roles: {
+            wifi: "戶外 Mesh AP + UWB/BLE：提供骨幹回傳，巡檢員信標自動執行白名單解防免誤報",
+            radar: "77/60GHz 廣域雷達：穿透暴雨濃霧量測距離、速度與人類步態微都卜勒，剔除樹影與低矮動物",
+            thermal: "策略佈點 VOx 熱像：於霧夜（MOR ~13m 仍 ≥90%）驗證溫血人類垂直輪廓，不漏抓深色迷彩入侵者",
+            camera: "Starlight 4K：僅於非白名單溫血人類翻越電子圍籬後喚醒變焦，拍攝高清人臉/車牌取證"
+          }
+        },
+        {
+          rank: 4, code: "C1", domain: "factory", domainLabel: "智慧工廠／工安",
+          name: "人機協作（HRC）安全圍籬動態降速與防夾撞守護",
+          shortName: "人機協作（HRC）／智慧倉儲盲區防護",
+          need: 9.2, tech: 9.4, privacy: 8.0, roi: 8.6, feasibility: 8.2, total: 87.7, flagship: 4,
+          minReq: ["wifi", "radar", "thermal"], fullReq: ["wifi", "radar", "thermal", "camera"],
+          trigger: "工廠光影劇變、水霧、粉塵或垂掛電纜晃動引發傳統安全光柵/視覺頻繁誤急停（E-Stop）損失產能。",
+          value: "符合 ISO/TS 15066，減少 70%–85% 誤急停損失，端對端 PLC 降速觸發 <50–150 ms。",
+          roles: {
+            wifi: "UWB + 工廠 Wi-Fi 7：安全帽 UWB 標籤（10–30 cm）實現跨貨架盲區預警並區分授權人員權限",
+            radar: "60/77GHz 工業雷達：穿透焊煙油霧粉塵量測人手與機械臂真實距離與逼近速度矢量",
+            thermal: "中低階 VOx 熱像：在機械與鋼鐵背景中剝離「活體體溫」與「晃動電纜/飛蛾/掉落紙箱」",
+            camera: "邊緣視覺 AI：判讀安全帽/PPE 配戴與手部意圖姿態，原始人臉端側模糊去識別化"
+          }
+        },
+        {
+          rank: 5, code: "B2", domain: "security", domainLabel: "智慧安防／建築",
+          name: "智慧商辦精準佔用感知與 HVAC／照明零「誤關」節能",
+          shortName: "智慧商辦微氣候 HVAC 零誤關與分級安防",
+          need: 8.4, tech: 8.4, privacy: 9.0, roi: 8.8, feasibility: 9.4, total: 87.3, flagship: 5,
+          minReq: ["wifi", "radar", "thermal"], fullReq: ["wifi", "radar", "thermal", "camera"],
+          trigger: "傳統 PIR 無法偵測靜坐打字人員導致頻繁 False-Off，迫使大樓設 30–60 分鐘無人延遲造成空調浪費。",
+          value: "無人延遲縮短至 5–10 分鐘，再釋放 15%–25% HVAC/照明節能，利舊 AP 1.5–2.5 年回本。",
+          roles: {
+            wifi: "吸頂 Wi-Fi 7 AP：複用每百平米必裝 AP 零拉線，802.11bf CSI 掌握樓層巨觀人流與新風換氣",
+            radar: "60GHz mmWave：負責會議室與工位靜態呼吸微動存在確認，靜坐兩小時亦零 False-Off",
+            thermal: "32×24 MLX90640 級熱陣：測量室內熱負荷調風閥，並剔除「玻璃外走廊行人穿牆雷達穿透干擾」",
+            camera: "IP Camera：日間辦公 100% 關閉零職場監控；僅非辦公夜間異常滯留或入侵時 L2/L3 喚醒"
+          }
+        },
+        {
+          rank: 6, code: "D3", domain: "infra", domainLabel: "交通與能源基建",
+          name: "無人變電站（Substation）／太陽能案場設備健康與防盜防護",
+          shortName: "變電站／太陽能案場預測性維護與防盜",
+          need: 9.0, tech: 8.6, privacy: 7.2, roi: 9.2, feasibility: 8.0, total: 84.2, flagship: null,
+          minReq: ["thermal", "camera"], fullReq: ["wifi", "radar", "thermal", "camera"],
+          trigger: "變電站偏遠分散、高壓設備具致命電弧風險、夜晚竊盜或野生動物闖入造成非計畫跳電。",
+          value: "預測性維護降低非計畫停機高達 73%，單一架構兼顧資產壽命保護與偏遠低頻寬防盜。",
+          roles: {
+            wifi: "Wi-Fi / 5G 邊緣閘道：傳送設備健康指標並大幅壓縮偏遠上行頻寬",
+            radar: "mmWave 雷達：過濾風吹雜草與動物，精準追蹤翻牆入侵人員動態",
+            thermal: "測溫熱像：連續監測變壓器套管與太陽能匯流箱異常熱點（提前 3–18 個月預警劣化）",
+            camera: "IP Camera：僅於確認異常闖入或溫升警報時回傳高清照片存證"
+          }
+        },
+        {
+          rank: 7, code: "C2", domain: "factory", domainLabel: "智慧工廠／工安",
+          name: "高壓配電盤、馬達軸承與變壓器熱異常早期火災預警",
+          shortName: "工廠高壓配電盤熱異常預警與電弧防護",
+          need: 9.0, tech: 8.8, privacy: 7.0, roi: 8.8, feasibility: 8.2, total: 84.0, flagship: null,
+          minReq: ["thermal", "camera"], fullReq: ["wifi", "radar", "thermal", "camera"],
+          trigger: "煙感於起火後才動作；純熱像受陽光直射與低放射率金屬反光誤報；高壓電弧巡檢高危。",
+          value: "提前數週至數小時預測絕緣劣化與接觸不良，避免 $50K–$260K+/小時非計畫停機與火災。",
+          roles: {
+            wifi: "Wi-Fi 7 / 工業無線：確定性低延遲傳輸與異質資料邊緣匯流",
+            radar: "mmWave 雷達：偵測人員誤闖高壓帶電電弧閃絡區與機械異常微振動",
+            thermal: "24/7 輻射測溫 VOx：追蹤銅排接點異常溫升梯度 (ΔT/Δt)",
+            camera: "IP Camera：熱點觸發後對焦讀錶頭數值、指示燈顏色或冒煙狀態消除金屬反光誤報"
+          }
+        },
+        {
+          rank: 8, code: "A2", domain: "care", domainLabel: "智慧照護／醫療",
+          name: "失智症長者夜間徘徊走失預警與日夜節律（ADL）分析",
+          shortName: "失智長者夜間徘徊防走失與廚房防乾燒",
+          need: 8.6, tech: 8.2, privacy: 9.0, roi: 7.6, feasibility: 8.2, total: 83.7, flagship: null,
+          minReq: ["wifi", "thermal"], fullReq: ["wifi", "radar", "thermal", "camera"],
+          trigger: "失智長者半夜開啟大門外出、陽台/廚房徘徊忘記關火，或活動力長期退化。",
+          value: "串聯「行為退化早期發現＋即時防走失與廚房防乾燒」雙重安全網。",
+          roles: {
+            wifi: "BLE/UWB + Wi-Fi CSI：門廳跨房軌跡追蹤與長者活動節律基線分析",
+            radar: "mmWave 雷達：床邊離床偵測與室內靜止/跌坐姿態分辨",
+            thermal: "VOx 熱像：廚房爐火遺忘高溫乾燒偵測＋人員在場位置確認",
+            camera: "IP Camera：大門夜間異常開啟時端側確認是否獨自外出"
+          }
+        },
+        {
+          rank: 9, code: "B3", domain: "security", domainLabel: "智慧安防／建築",
+          name: "智慧零售熱區動線、高隱私試衣間防昏倒與貨架防竊",
+          shortName: "智慧零售動線與高隱私試衣間安全守護",
+          need: 7.8, tech: 8.2, privacy: 9.2, roi: 8.2, feasibility: 8.6, total: 83.6, flagship: null,
+          minReq: ["wifi", "camera"], fullReq: ["wifi", "radar", "thermal", "camera"],
+          trigger: "顧客拒斥攝影機監看試衣間；店內需精準計算轉換率、排隊長度並偵測高單價櫃位異常聚集。",
+          value: "突破零售 GDPR 隱私紅線，整合人流變現分析與試衣間突發安全守護。",
+          roles: {
+            wifi: "Wi-Fi / BLE：巨觀商場回訪率、動線熱區與區域停留時長",
+            radar: "60GHz mmWave：100% 匿名試衣間/洗手間人數清點與顧客昏倒跌倒救援",
+            thermal: "低解析熱像：入口昏暗人流計數輔助與熱區停留驗證",
+            camera: "IP Camera：端側匿名統計結帳排隊長度，並對貨架異常取物進行授權取證"
+          }
+        },
+        {
+          rank: 10, code: "C3", domain: "factory", domainLabel: "智慧工廠／工安",
+          name: "智慧倉儲堆高機／AGV 與人員粉塵冷鏈盲區防撞系統",
+          shortName: "倉儲堆高機／AGV 冷鏈結霧與視線死角防撞",
+          need: 8.8, tech: 8.6, privacy: 7.5, roi: 8.5, feasibility: 8.0, total: 83.3, flagship: null,
+          minReq: ["wifi", "radar", "thermal"], fullReq: ["wifi", "radar", "thermal", "camera"],
+          trigger: "冷凍庫出入口結霧、高架料架轉角視線死角與揚塵環境使光學相機與 2D LiDAR 失能。",
+          value: "雙重消除轉角遮蔽盲區與低溫結霧視覺退化，兼顧廠內搬運效率與人員安全。",
+          roles: {
+            wifi: "UWB 工業測距：車載錨點與安全帽標籤實現 10–30 cm 跨貨架視距外預警",
+            radar: "77/60GHz 雷達：穿透冷氣水霧與揚塵即時量測障礙物距離與相對速度",
+            thermal: "VOx 熱像：冷鏈低溫環境下形成極高對比度鎖定作業員體溫輪廓",
+            camera: "邊緣視覺：端側辨識棧板、立柱與人員，大幅減少無謂急煞停頓"
+          }
+        },
+        {
+          rank: 11, code: "D2", domain: "infra", domainLabel: "交通與能源基建",
+          name: "長距離公路隧道／地下停車場火警偵測與濃煙受困定位",
+          shortName: "公路隧道／地下空間火警與濃煙受困定位",
+          need: 9.0, tech: 9.2, privacy: 7.4, roi: 7.8, feasibility: 7.4, total: 83.1, flagship: null,
+          minReq: ["thermal", "radar", "camera"], fullReq: ["wifi", "radar", "thermal", "camera"],
+          trigger: "隧道通風高速氣流吹散煙霧導致傳統煙感延遲；起火後濃黑煙使所有可見光 CCTV 瞬間失明。",
+          value: "解決隧道救災最大盲點——「濃煙中到底有幾人困在哪一車道」。",
+          roles: {
+            wifi: "Wi-Fi / 專網骨幹：隧道段間確定性傳輸與緊急廣播連動匯流",
+            radar: "77GHz 4D 雷達：穿過極濃黑煙持續追蹤滯留車輛與受困人員移動/呼吸座標",
+            thermal: "測溫熱像：穿透初期煙霧偵測車輛底盤過熱或起火點溫度場分佈",
+            camera: "IP Camera：火災前辨識交通事故與逆向行駛，起火初期協助判讀車型"
+          }
+        },
+        {
+          rank: 12, code: "B4", domain: "security", domainLabel: "智慧安防／建築",
+          name: "博物館／金庫／資料中心「跨牆預警＋去識別化存證」",
+          shortName: "博物館／金庫跨牆預警與去識別化存證",
+          need: 8.0, tech: 8.8, privacy: 8.2, roi: 7.8, feasibility: 7.8, total: 81.8, flagship: null,
+          minReq: ["wifi", "radar", "camera"], fullReq: ["wifi", "radar", "thermal", "camera"],
+          trigger: "宵小由鄰室鑿牆或破壞管道間潛入，傳統室內攝影機破牆前不知，且平時錄影涉及員工隱私。",
+          value: "實現「侵入發生前」的跨牆早期預警與合法合規之低儲存架構。",
+          roles: {
+            wifi: "Wi-Fi CSI：牆體與鄰接空間異常無線通道擾動偵測",
+            radar: "mmWave 雷達：穿透輕隔間偵測牆後異常人員靠近與鑿牆微振動",
+            thermal: "VOx 熱像：偵測室內人體熱源與電動切割/鑽孔工具高溫發熱",
+            camera: "IP Camera：平時不錄影；僅高危驗證成立時喚醒高畫質加密存證"
+          }
+        },
+        {
+          rank: 13, code: "D1", domain: "infra", domainLabel: "交通與能源基建",
+          name: "智慧路口弱勢用路人（VRU）濃霧暴雨防撞與 V2X 預警",
+          shortName: "智慧路口 VRU 濃霧暴雨防撞與 V2X 預警",
+          need: 8.8, tech: 8.4, privacy: 7.6, roi: 7.4, feasibility: 7.2, total: 80.1, flagship: null,
+          minReq: ["radar", "thermal", "camera"], fullReq: ["wifi", "radar", "thermal", "camera"],
+          trigger: "濃霧、夜間對向車燈眩光與暴雨導致路口攝影機與 LiDAR 漏檢行人、單車騎士（VRU）。",
+          value: "惡劣天候 mAP 提升 15%–20%，提前輸出 V2X 碰撞時間（TTC）降低路口死傷。",
+          roles: {
+            wifi: "Wi-Fi / C-V2X 路側單元：即時低延遲廣播碰撞風險給周邊車輛",
+            radar: "77GHz 4D 雷達：抗雨霧長距鎖定 VRU 4D 軌跡與時間碰撞（TTC）計算",
+            thermal: "VOx 熱像：補齊霧夜靜止行人熱特徵（MOR ~13m 維持 ≥90% 偵測率）",
+            camera: "4K WDR 視覺：晴朗/微光下辨識號誌狀態、車種與違規行為"
+          }
+        },
+        {
+          rank: 14, code: "A3", domain: "care", domainLabel: "智慧照護／醫療",
+          name: "醫院負壓隔離病房非接觸生理巡檢與突發發燒篩檢",
+          shortName: "負壓隔離病房非接觸生理巡檢與發燒篩檢",
+          need: 8.2, tech: 8.0, privacy: 8.2, roi: 7.6, feasibility: 7.4, total: 79.4, flagship: null,
+          minReq: ["radar", "thermal"], fullReq: ["wifi", "radar", "thermal", "camera"],
+          trigger: "降低醫護穿脫防護衣進入隔離病房頻率，防止高傳染病交叉感染並即時掌握呼吸窘迫。",
+          value: "減少醫護接觸風險與耗材成本，實現 24/7 無接觸連續生理看板。",
+          roles: {
+            wifi: "Wi-Fi 7 AP：病房醫療設備數據匯流與加密生理指標回傳",
+            radar: "60GHz mmWave：連續無接觸監測呼吸率（±1–2 rpm）與心率（±5 bpm）",
+            thermal: "VOx 熱像：體表溫度連續趨勢監測與突發發燒升溫預警",
+            camera: "IP Camera：經病患授權時啟動遠端醫療視訊會診與異常姿勢覆核"
+          }
+        },
+        {
+          rank: 15, code: "A4", domain: "care", domainLabel: "智慧照護／醫療",
+          name: "獨居長者用藥依從性與「突發生理失能」雙重關聯監護",
+          shortName: "獨居長者用藥依從性與失能關聯監護",
+          need: 7.8, tech: 7.6, privacy: 8.6, roi: 7.2, feasibility: 7.6, total: 77.9, flagship: null,
+          minReq: ["wifi", "radar"], fullReq: ["wifi", "radar", "thermal", "camera"],
+          trigger: "長者獨居服藥時間未取藥，隨後出現昏迷、發燒或客廳跌倒，單一空間感測缺乏因果脈絡。",
+          value: "結合「用藥行為＋全屋活動力＋生理熱徵象」，提前搶救黃金救援時間。",
+          roles: {
+            wifi: "BLE/UWB + Wi-Fi CSI：藥盒/隨身信標觸發確認＋全屋活動力基線驟降偵測",
+            radar: "60GHz mmWave：確認目標靜止無位移且呼吸微弱或跌倒姿勢",
+            thermal: "VOx 熱像：交叉驗證體表異常低溫或高燒狀態",
+            camera: "IP Camera：L2 端側骨架確認是否正常就寢或突發昏厥"
+          }
+        }
+      ];
+
+      const TOP5_DETAILS = [
+        {
+          rank: 1, code: "A1", score: 93.3,
+          title: "銀髮居家與長照衛浴／臥室「零穿戴、Privacy-by-Design」跌倒與生命徵象守護系統",
+          subScores: "市場剛需 9.6 · 不可替代性 9.2 · 隱私優勢 9.8 · ROI 8.8 · 落地可行性 9.0",
+          painPoints: [
+            "穿戴裝置高棄用率：高達 23% 長者未依規配戴足夠時數，洗澡、如廁與夜間離床恰為最高風險空窗。",
+            "純視覺攝影機隱私紅線：臥室/衛浴 24 小時錄影違反 GDPR 資料最小化（Art.5），引發 Granny Cam 倫理抗拒。",
+            "護理站警報疲勞：臨床監測設備高達 80%–99% 警報為誤報；單用 CSI 易受寵物/掃地機干擾，單用雷達在緩慢滑倒或家具遮擋時仍有誤差。"
+          ],
+          roles: [
+            { tag: "無線網路設備 (Wi-Fi 7/802.11bf + BLE)", color: "var(--accent-cyan)", text: "利用 Sub-7GHz 跨房穿透追蹤全域活動節律 (ADL)、偵測夜間離床超時未回或突發急停，作低功耗喚醒哨兵。" },
+            { tag: "60GHz mmWave (TI IWR6843AOP / IWRL6432)", color: "var(--accent-indigo)", text: "部署於衛浴與床頭，穿透水蒸氣與棉被擷取 3D 高度剖面，倒地後立即量測亞毫米級胸腔呼吸起伏分辨昏迷與休憩。" },
+            { tag: "Thermal VOx (32×24 至 160×120)", color: "var(--accent-amber)", text: "以非視覺方式確認倒地物具 34°C–37°C 人體體溫（剔除棉被、抱枕與寵物誤報），並偵測發燒或失溫異常。" },
+            { tag: "IP Camera (Starlight 4K，預設休眠)", color: "var(--accent-emerald)", text: "平時零擷取、零串流；僅在重度跌倒且無呼吸反應時於端側產出 17 點火柴人骨架，經預授權急救始開加密雙向通話。" }
+          ],
+          flow: [
+            "L0 常駐：Wi-Fi 802.11bf CSI 感測全屋擾動＋雷達 LPDS 待命，全屋零影像擷取。",
+            "L1 非視覺驗證：發現衛浴滯留或驟停 → 2ms 喚醒 60GHz 雷達測高度/呼吸 + Thermal 驗體溫。",
+            "L2 去識別骨架：走廊/客廳端側抽取 17 點骨架座標確認姿態，原始幀 <100ms RAM 覆寫銷毀。",
+            "L3 危急通報：雷達＋熱像雙重確診無呼吸或倒地超時，始建立 AES-256-GCM 連線通報護理站/119。"
+          ],
+          kpis: [
+            "實務誤報率再降 75%–90%（單純 60GHz 受控準確度 97%–99.5%、CSI <1.5%–2%，三重聯鎖消除寵物與物品誤觸，[合理工程推估]）。",
+            "全屋常態回傳頻寬與雲端儲存節省 >95%（由 4K 24/7 每路 4–8 Mbps 降至數十 kbps 事件）。",
+            "端對端非視覺三重確認反應時間壓縮於 1.5–3.0 秒內（含倒地爬起觀察窗），無須長者手動按鈕。"
+          ]
+        },
+        {
+          rank: 2, code: "C4", score: 90.9,
+          title: "鋰電池儲能站（BESS）／EV 超充站與高壓配電設施「熱失控前兆截斷＋濃煙穿透搜救」防護系統",
+          subScores: "市場剛需 9.8 · 不可替代性 9.6 · 隱私優勢 7.6 · ROI 9.5 · 落地可行性 8.6",
+          painPoints: [
+            "傳統煙感致命滯後：鋰電池熱失控 Stage 1 內短路升溫早於明火；開放超充站與強通風貨櫃氣流稀釋煙霧使煙感延遲數分鐘。",
+            "單用熱像高溫誤報與災後致盲：夏季日曬深色車頂、剛駛入的高溫煞車碟盤易誤觸發；起火後濃黑毒煙使光學與部分標準測溫飽和，無法確認受困者。",
+            "單顆變壓器/儲能毀損代價達 $10 萬至 $200 萬美元以上，非計畫停機與電網罰款極為驚人。"
+          ],
+          roles: [
+            { tag: "Thermal VOx (Lepton 3.5 / Boson+)", color: "var(--accent-amber)", text: "24/7 掃描電池櫃接頭、充電槍與底盤電池包，於 >70°C 或異常溫升斜率 (ΔT/Δt) Stage 1 階段搶先預警。" },
+            { tag: "IP Camera (4K 工業寬動態)", color: "var(--accent-emerald)", text: "辨識車牌與插槍狀態，將高溫熱點與空間物件語意綁定——自動排除煞車碟盤/陽光反光，精準鎖定底盤或接頭過熱。" },
+            { tag: "mmWave Radar (60/77GHz 4D)", color: "var(--accent-indigo)", text: "於高壓急停跳脫或惰性氣體滅火前確認人員撤離；Stage 3 濃黑煙中維持 >90% 穿透定位受困人員位置與生命徵象。" },
+            { tag: "工業寬溫 Wi-Fi 7 + 5G/PoE++ 閘道", color: "var(--accent-cyan)", text: "在地下停車場與偏遠儲能站建構低延遲運算中樞，毫秒級連動 BMS 斷電跳脫並推送熱圖與點雲給消防指揮車。" }
+          ],
+          flow: [
+            "L0–L1 主力監控：日常由 Thermal（測溫矩陣）+ mmWave（車位與人員動態）執行，不錄製車主與路人日常影像。",
+            "L1→L2 語意核銷：偵測電池區異常升溫斜率 → 喚醒 Camera 於端側確認熱點部位為電池包/充電座而非引擎餘熱或陽光。",
+            "L3 緊急截斷與搜救：確證熱失控前兆立即連動 BMS 跳脫斷電並加密存證；濃煙起火後鎖定雷達點雲座標導引搜救。"
+          ],
+          kpis: [
+            "預警時間窗較傳統煙感提前數分鐘至數十分鐘（變壓器/電氣接頭劣化提前 3–18 個月偵測）。",
+            "消除 85%–95% 陽光反射與車體餘熱誤報（[合理工程推估]），並助關鍵電力設施減少高達 73% 非計畫停機風險。",
+            "可見光 Camera 視距歸零（0 m）濃煙下，mmWave 仍維持 90% 以上空間位置與微動穿透追蹤能力。"
+          ]
+        },
+        {
+          rank: 3, code: "B1", score: 88.1,
+          title: "關鍵園區／倉儲全天候「零誤報」周界入侵偵測與分級喚醒安防系統",
+          subScores: "市場剛需 8.8 · 不可替代性 8.8 · 隱私優勢 8.4 · ROI 9.0 · 落地可行性 9.2",
+          painPoints: [
+            "PIR 與純光學誤報災難：傳統 PIR 受風吹草動與陽光驟變影響，每日產生 20–50 次以上誤報；RGB 夜間受飛蟲、樹影、車燈眩光與濃霧困擾。",
+            "純熱像高價與氣候/動物盲區：中大型溫血動物近距、夏季柏油路面熱浪閃爍與暴雨溫差趨近 (ΔT→0) 仍會誤漏報；工業雙光 PTZ 單機達 $10,000+ USD。",
+            "無人夜間畫面以 4–8 Mbps 持續佔滿骨幹上行頻寬與儲存空間。"
+          ],
+          roles: [
+            { tag: "戶外 Mesh AP + UWB / BLE 白名單", color: "var(--accent-cyan)", text: "提供廣域回傳，並透過夜間巡檢員配戴之加密信標自動核銷白名單，巡邏經過警戒區零誤報。" },
+            { tag: "mmWave Radar (77/60GHz 廣域追蹤)", color: "var(--accent-indigo)", text: "無懼暴雨濃霧，量測距離、速度向量與人體步態微都卜勒特徵，直接剔除往復搖晃樹枝與低矮小動物。" },
+            { tag: "Thermal VOx (策略佈點熱陣列)", color: "var(--accent-amber)", text: "無須全面採購天價長距熱像，僅於盲區驗證人類恆溫輪廓（Cerema 霧室 MOR ~13m 仍達 ≥90% 偵測率）。" },
+            { tag: "IP Camera (Starlight 4K)", color: "var(--accent-emerald)", text: "僅於「非白名單＋雷達人體步態＋熱像人類輪廓」三者同時成立時喚醒變焦拍攝高清人臉/車牌呈堂存證。" }
+          ],
+          flow: [
+            "L0 白名單與電子圍籬：園區外圍公共道路設零錄影禁區，由 BLE/UWB 白名單＋低功耗雷達/熱陣守護圍牆內側。",
+            "L1 物理交叉濾波：雷達速度/質心過濾動物與樹影 + Thermal 確認人類體熱輪廓。",
+            "L2–L3 變焦取證：確認入侵進入管制區，始喚醒 Starlight 4K 攝影機執行匿名追蹤或加密派遣取證。"
+          ],
+          kpis: [
+            "綜合周界誤報率壓低至每百公尺每月 <1–2 次（較傳統 PIR/動態偵測降低 >98%，[合理工程推估]）。",
+            "分層硬體配置（低價雷達＋中階熱陣＋現有 Starlight 相機）較全面換裝雙光 PTZ 降低 40%–60% 初期 CapEx。",
+            "事件喚醒傳輸策略節省 >90% 夜間冗餘錄影儲存與無線骨幹頻寬。"
+          ]
+        },
+        {
+          rank: 4, code: "C1", score: 87.7,
+          title: "智慧工廠人機協作（HRC）與倉儲堆高機／AGV 粉塵盲區動態安全守護系統",
+          subScores: "市場剛需 9.2 · 不可替代性 9.4 · 隱私優勢 8.0 · ROI 8.6 · 落地可行性 8.2",
+          painPoints: [
+            "誤急停 (False Stops) 巨額損失：機械臂區安全光柵與純視覺易因電纜晃動、金屬反光、焊煙粉塵與飛蛾頻繁 E-Stop，重啟損耗產能與半成品。",
+            "倉儲冷鏈結霧與貨架死角：冷凍庫出入口結霧與高架貨架轉角遮蔽，單靠車載相機或 2D LiDAR 無法預知貨架後衝出人員。",
+            "工廠全時攝影監視引發工會與員工「微觀監控」反彈及勞動法規阻力。"
+          ],
+          roles: [
+            { tag: "UWB + 工廠 Wi-Fi 7/專網邊緣節點", color: "var(--accent-cyan)", text: "安全帽配戴 UWB 標籤（精度 10–30 cm）實現跨貨架 5 公尺視線外預警，並依工程師/訪客權限動態縮放安全半徑。" },
+            { tag: "mmWave Radar (60/77GHz 工業級)", color: "var(--accent-indigo)", text: "安裝於機械臂基座或堆高機四周，穿透焊煙油霧水氣量測人手/軀幹精確距離與逼近速度（符合 ISO/TS 15066）。" },
+            { tag: "Thermal VOx (中低階熱像)", color: "var(--accent-amber)", text: "於高反光鋼鐵與冷鏈環境迅速剝離「活體人員體熱」與「晃動電纜/塑膠門簾/紙箱」，消除誤觸發急停。" },
+            { tag: "IP Camera (邊緣視覺 AI)", color: "var(--accent-emerald)", text: "判定安全帽/反光背心合規性與手部協作意圖，日常人臉於端側即時模糊去識別化且不存檔。" }
+          ],
+          flow: [
+            "L0–L1 匿名防撞執行：日常僅靠 UWB 匿名 ID＋mmWave 點雲＋Thermal 體溫輪廓執行 PLC 動態減速與盲區預警。",
+            "L2 端側 PPE 合規檢查：Edge NPU 抽取去識別骨架與安全帽裝備標籤，原始人臉不寫入磁碟。",
+            "L3 工安事故回溯：唯有發生違規闖入禁區或真實碰撞急停事件時，始留存授權加密片段供檢討。"
+          ],
+          kpis: [
+            "較單一 2D 光柵或純視覺圍籬預期減少 70%–85% 不必要誤急停（False Stops），顯著提升產線 OEE（[合理工程推估]）。",
+            "本地 Edge 直接下達 PLC 安全降速訊號，端對端控制反應延遲壓縮至 <50–150 ms。",
+            "匿名 UWB/點雲取代 24/7 人臉監控，化解勞資隱私摩擦並加快跨廠複製。"
+          ]
+        },
+        {
+          rank: 5, code: "B2", score: 87.3,
+          title: "智慧商辦／醫療院所「微氣候 HVAC 精準節能與非侵入安全巡檢」一體化系統",
+          subScores: "市場剛需 8.4 · 不可替代性 8.4 · 隱私優勢 9.0 · ROI 8.8 · 落地可行性 9.4",
+          painPoints: [
+            "PIR False-Off 節能死結：員工靜坐打字或開會時 PIR 誤判無人而關空調熄燈，迫使工程師設定 30–60 分鐘無人延遲，下班後空房白吹冷氣一小時。",
+            "單用 Wi-Fi 或單用雷達限制：Wi-Fi 連線數受多裝置（手機+筆電）干擾；單用高敏 mmWave 會穿透玻璃隔間偵測走廊行人或空調風扇晃動，導致徹夜誤開。",
+            "辦公區全時裝攝影機點算人頭在 GDPR 與職場隱私規範下阻力極大。"
+          ],
+          roles: [
+            { tag: "天花板吸頂 Wi-Fi 7/6E AP", color: "var(--accent-cyan)", text: "100% 複用辦公樓每百平米必裝的現成 AP 與 PoE 佈線，以 802.11bf CSI 掌握全樓層巨觀人流與新風換氣。" },
+            { tag: "mmWave Radar (靜態微動確認)", color: "var(--accent-indigo)", text: "偵測會議室/工位靜坐人員胸腔呼吸微動，靜坐兩小時亦零 False-Off；人員離開後快速確認 0 呼吸狀態。" },
+            { tag: "Thermal VOx (32×24 MLX90640 級)", color: "var(--accent-amber)", text: "兩大奇效：(1) 算人體散熱與西曬熱負荷精調 VAV 風閥；(2) 因玻璃阻隔 LWIR，徹底過濾走廊行人穿牆雷達穿透誤報！" },
+            { tag: "IP Camera (分時排程預設關閉)", color: "var(--accent-emerald)", text: "日間辦公 100% 物理/邏輯關閉，零職場監視；僅下班保全模式偵測異常滯留時啟動 L2/L3 匿名告警。" }
+          ],
+          flow: [
+            "日間 L0–L1 無影像運行：Wi-Fi CSI（全域）+ mmWave（靜坐呼吸）+ 32×24 Thermal（玻璃邊界隔離與熱負荷）驅動 HVAC。",
+            "夜間排程保全模式：下班清空後自動轉入警戒；若三非視覺感測確認異常熱動侵入，始於 L2/L3 喚醒邊緣攝影機。"
+          ],
+          kpis: [
+            "False-Off 歸零，無人確認關機延遲由傳統 30–60 分鐘安全縮短至 5–10 分鐘。",
+            "較傳統定時/PIR 大樓額外釋放 15%–25% 空調與照明節能空間（[合理工程推估]）。",
+            "高度利舊現有企業 Wi-Fi AP 供電與佈線，於電費高昂商辦預期 1.5–2.5 年回收成本（Payback）。"
+          ]
+        }
+      ];
+
+      const SCENARIOS = [
+        {
+          id: "L0",
+          level: "L0｜常駐極低功耗",
+          name: "日常無人 (L0 節能巡檢)",
+          badge: "Tier-0 最高隱私（零影像 / 零個資）",
+          badgeClass: "badge-cyan",
+          color: "var(--accent-cyan)",
+          hex: "#38bdf8",
+          soft: "var(--cyan-soft)",
+          sensors: {
+            wifi: { state: "ACTIVE", mode: "802.11bf CSI 100 Hz 常駐掃描 + BLE 監聽", power: "邊際感測極低", cls: "badge-cyan" },
+            radar: { state: "LPDS 休眠", mode: "保留 Retention SRAM，~0.48–0.67 mW (2 ms 喚醒)", power: "~0.5 mW", cls: "badge-indigo" },
+            thermal: { state: "關斷 / Shutdown", mode: "Lepton 待機 ~5 mW / MLX90640 MOSFET 斷電 0 mW", power: "~0–5 mW", cls: "badge-muted" },
+            camera: { state: "硬體關閉 / Standby", mode: "ISP 時脈閘控，感測器本體待機", power: "< 1–5 mW", cls: "badge-muted" }
+          },
+          busBwLabel: "~0.35 – 1.5 Mbps",
+          busBwNote: "CSI 內部擷取（於 AP 內部直算，不佔對外網）",
+          busPct: 12,
+          uplinkBwLabel: "< 2 – 5 kbps",
+          uplinkBwNote: "僅心跳包與無人狀態摘要（較 4K H.265 節省 >99.9%）",
+          uplinkPct: 3,
+          incPowerLabel: "~0.3 – 0.8 W",
+          incPowerPct: 6,
+          totalPowerLabel: "~12.5 – 19 W",
+          totalPowerNote: "含全速三頻 Wi-Fi 7 AP Idle 12–18 W 骨幹負載",
+          totalPowerPct: 35,
+          latencyLabel: "20 – 40 ms",
+          latencyNote: "僅 2–4 筆 100 Hz CSI 滑動窗採樣與 Fresnel 方差判別；無須喚醒高功耗成像鏈。",
+          retentionTitle: "Volatile RAM 僅留射頻特徵方差（Zero Image / Zero PII）",
+          retentionDesc: "完全無光學與溫度成像，不構成任何影像或生物特徵資料。完全符合 GDPR 非個資範疇與臥室/衛浴最嚴苛隱私規範。",
+          activeNodes: ["wifi", "sync", "edge", "meta", "backhaul"],
+          activeLines: ["w-s", "s-e", "e-m", "m-b"],
+          stageTimings: ["20–40 ms", "待命 (0 ms)", "關閉", "0 ms", "1–5 ms"]
+        },
+        {
+          id: "L1",
+          level: "L0 → L1｜非視覺追蹤",
+          name: "日常正常活動 (L1 非視覺追蹤)",
+          badge: "Tier-1 非視覺合規（HIPAA / GDPR 匿名）",
+          badgeClass: "badge-indigo",
+          color: "var(--accent-indigo)",
+          hex: "#818cf8",
+          soft: "var(--indigo-soft)",
+          sensors: {
+            wifi: { state: "ACTIVE", mode: "CSI 100–200 Hz + BLE AoA/UWB 白名單確認", power: "骨幹常駐", cls: "badge-cyan" },
+            radar: { state: "ACTIVE (10 Hz)", mode: "GPIO 2 ms 喚醒，10 Hz 低功耗追蹤與呼吸監測", power: "~10–150 mW / 低功耗模式", cls: "badge-indigo" },
+            thermal: { state: "低頻按需掃描", mode: "1–9 Hz 粗粒度掃描驗證熱區（無異常待命）", power: "~76–150 mW", cls: "badge-amber" },
+            camera: { state: "保持關閉", mode: "RGB CMOS 保持硬體關閉，零影像擷取", power: "< 5 mW", cls: "badge-muted" }
+          },
+          busBwLabel: "50–150 kbps + 熱陣 0.1–2.7 Mbps",
+          busBwNote: "CSI + 雷達 3D 點雲 TLV + 低解析熱陣列於本地匯流",
+          busPct: 24,
+          uplinkBwLabel: "5 – 20 kbps",
+          uplinkBwNote: "僅上傳匿名存在計數、熱區安全狀態與心率/呼吸摘要（節省 >99%）",
+          uplinkPct: 8,
+          incPowerLabel: "~1.2 – 2.5 W",
+          incPowerPct: 18,
+          totalPowerLabel: "~19 – 30 W",
+          totalPowerNote: "含 Wi-Fi 7 AP Normal 18–28 W 負載（PoE+ 25.5W 臨界，建議 PoE++）",
+          totalPowerPct: 54,
+          latencyLabel: "20 – 40 ms (熱像預熱) / 110–180 ms (Shutdown 喚醒)",
+          latencyNote: "GPIO SYNC_IN 2 ms 喚醒雷達 + HWA 2D-FFT 點雲計算 (~0.2 TOPS)，D-S 證據理論確認安全活動後設 30–60 秒遲滯冷卻。",
+          retentionTitle: "僅保留匿名點雲座標與統計摘要（無容貌識別可能）",
+          retentionDesc: "原始點雲與粗熱矩陣於 Edge RAM 即時計算後銷毀，不落盤、無五官輪廓，符合 HIPAA 與 GDPR 匿名生理追蹤要求。",
+          activeNodes: ["wifi", "radar", "thermal", "sync", "edge", "meta", "backhaul"],
+          activeLines: ["w-s", "r-s", "t-s", "s-e", "e-m", "m-b"],
+          stageTimings: ["20–40 ms", "20–40 ms*", "關閉", "<5 ms", "1–5 ms"]
+        },
+        {
+          id: "L2",
+          level: "L2｜Edge 去識別化驗證",
+          name: "疑似跌倒 / 異常高溫 (L2 去識別化)",
+          badge: "Tier-2 邊緣去識別化合規（Zero Disk Persistence）",
+          badgeClass: "badge-amber",
+          color: "var(--accent-amber)",
+          hex: "#fb923c",
+          soft: "var(--amber-soft)",
+          sensors: {
+            wifi: { state: "HIGH-RATE (500 Hz)", mode: "500 Hz 微動輔助 + 跨房時間對齊", power: "骨幹匯流", cls: "badge-cyan" },
+            radar: { state: "ACTIVE (20 Hz)", mode: "20 Hz 高密度點雲與胸腔微多普勒分析", power: "~1.0–1.8 W", cls: "badge-indigo" },
+            thermal: { state: "ACTIVE (9–30 Hz)", mode: "160×120 @ 9–30 Hz 輻射測溫測繪", power: "~140–240 mW+", cls: "badge-amber" },
+            camera: { state: "TEE RAM 熱喚醒", mode: "喚醒寫入受保護 TEE Volatile RAM（嚴禁寫入磁碟）", power: "NPU+CMOS ~5.5–9.5 W", cls: "badge-emerald" }
+          },
+          busBwLabel: "0.75 – 3.0 Gbps (YUV 進 RAM) + 9.45 Mbps",
+          busBwNote: "高頻寬 Raw YUV 嚴格限制於內部 LPDDR4X/5 Zero-Copy DMA-BUF",
+          busPct: 82,
+          uplinkBwLabel: "15 – 60 kbps",
+          uplinkBwNote: "對外僅傳送 17 點骨架向量、匿名 BBox 與熱點座標 JSON（節省 >98%）",
+          uplinkPct: 16,
+          incPowerLabel: "~5.5 – 9.5 W",
+          incPowerPct: 68,
+          totalPowerLabel: "~24 – 38 W",
+          totalPowerNote: "已超過 PoE+ (802.3at 25.5 W) 上限，須採 PoE++ Type 3 (51 W PD)",
+          totalPowerPct: 76,
+          latencyLabel: "預熱最佳 110–205 ms / 標準逐級 250–420 ms",
+          latencyNote: "CMOS 熱喚醒 + Fast-AE (35–50 ms) → YOLOv8n-pose INT8 + Cross-Attention 推論 (20–45 ms, 3.5–8.0 TOPS)。",
+          retentionTitle: "TEE Volatile RAM <100 ms 立即覆寫銷毀（嚴禁落盤）",
+          retentionDesc: "OS 層級禁止儲存寫入與 RTSP 原始流對外埠口；抽取 17 點骨架與異常類別後於 <100 ms 覆寫清零，滿足 GDPR Art.25 資料最小化。",
+          activeNodes: ["wifi", "radar", "thermal", "camera", "sync", "ram", "edge", "meta", "backhaul"],
+          activeLines: ["w-s", "r-s", "t-s", "c-s", "s-ram", "ram-e", "s-e", "e-m", "m-b"],
+          stageTimings: ["20–40 ms", "20–40 ms", "35–50 ms", "20–45 ms", "10–15 ms"]
+        },
+        {
+          id: "L3",
+          level: "L3｜授權存證與聯動",
+          name: "確認入侵 / 熱失控危急告警 (L3 加密存證)",
+          badge: "Tier-3 受控合規存證（AES-256-GCM + RBAC）",
+          badgeClass: "badge-rose",
+          color: "var(--accent-rose)",
+          hex: "#fb7185",
+          soft: "var(--rose-soft)",
+          sensors: {
+            wifi: { state: "MAX (500–1000 Hz)", mode: "Wi-Fi 7 MLO / 10GbE 確定性告警上行", power: "全速骨幹", cls: "badge-cyan" },
+            radar: { state: "MAX (20–30 Hz)", mode: "全速空間座標追蹤與濃煙穿透生理定位", power: "~1.5–2.5 W", cls: "badge-indigo" },
+            thermal: { state: "MAX (30 Hz)", mode: "全速絕對測溫與異常熱點擴散追蹤", power: "全速運行", cls: "badge-amber" },
+            camera: { state: "4K H.265 加密存證", mode: "凍結 Pre-roll 5–10s + 雙向語音 + 第三者動態遮罩", power: "整機增量 ~8–14 W", cls: "badge-rose" }
+          },
+          busBwLabel: "~1.5 – 3.2 Gbps",
+          busBwNote: "全模態開啟並從 Volatile RAM 環形緩衝區讀取 Pre-roll 影格",
+          busPct: 100,
+          uplinkBwLabel: "15 – 30 Mbps（DOL-HDR 最高 40–60 Mbps）",
+          uplinkBwNote: "4K @ 30fps H.265 加密串流 + 雙向音訊 64 kbps（僅危急事件觸發）",
+          uplinkPct: 100,
+          incPowerLabel: "~8 – 14 W",
+          incPowerPct: 100,
+          totalPowerLabel: "~30 – 48+ W",
+          totalPowerNote: "高負載必選 PoE++ 802.3bt Type 3/4 (60–90 W PSE / 51–71.3 W PD)",
+          totalPowerPct: 100,
+          latencyLabel: "預熱最佳 110–205 ms / 標準逐級 250–420 ms",
+          latencyNote: "含 Stage 4 硬體 VPU H.265 編碼 + AES-256-GCM 加密打包 (10–25 ms) + Wi-Fi 7 STR / GbE 確定性傳輸 (1–5 ms)。",
+          retentionTitle: "Pre-roll 5–10 秒 AES-256-GCM + TLS 1.3 加密託管",
+          retentionDesc: "具明確合法正當性（Vital Interests / RBAC 雙因子審計權杖授權），自動對非涉事第三方套用動態模糊遮罩 (Privacy Masking)。",
+          activeNodes: ["wifi", "radar", "thermal", "camera", "sync", "ram", "edge", "forensic", "backhaul"],
+          activeLines: ["w-s", "r-s", "t-s", "c-s", "s-ram", "ram-e", "ram-f", "e-f", "f-b"],
+          stageTimings: ["20–40 ms", "20–40 ms", "35–50 ms", "20–45 ms", "15–30 ms"]
+        }
+      ];
+
+      const BOM_DATA = {
+        t1: {
+          title: "Tier 1｜消費級 / 入門商用（目標 BOM $65–$120 USD）",
+          targetDesc: "獨居長輩居家、小型診所、零售防盜與智慧套房節能；極致低功耗常駐與 1–2 TOPS 輕量 NPU。",
+          msrp: "$149 – $229 USD（含首年基礎雲服務）",
+          margin: "30% – 38%",
+          distExample: {
+            label: "1 戶 3 房分散式套件（1 台 Edge NPU 閘道 $38 + 3 台無鏡頭臥室/衛浴節點 $40–$48）",
+            totalRange: "$158 – $182 USD",
+            perUnit: "$53 – $61 USD / 房",
+            note: "單房邊際 BOM 再降 25%–40%，且徹底實現衛浴與臥室零鏡頭極致隱私。"
+          },
+          callout: "生命週期提醒：原本 80×60 級距常用的 FLIR Lepton 2.5 已進入 EOL 過渡期（Teledyne FLIR 排定 2027 年底停售），Tier 1 新專案應優先採用 Melexis MLX90640。",
+          std: {
+            trackLabel: "高性價比非 NDAA 組",
+            totalMin: 61.80, totalMax: 88.00,
+            items: [
+              { sys: "低解析熱陣列", chip: "Melexis MLX90640 (32×24 FIR, NETD 0.1K)", quote: "$35.0–$50.0 (IC)", min: 20.0, max: 26.0, color: "var(--accent-amber)" },
+              { sys: "PCB、機構與組測 (FATP)", chip: "6 層板、阻燃 ABS 外殼、散熱片、燒測", quote: "—", min: 12.0, max: 16.5, color: "var(--text-secondary)" },
+              { sys: "Edge AI NPU + 視覺 SoC", chip: "Rockchip RV1106G3 / RV1126 (1.0–2.0 TOPS)", quote: "$10–$25 (板)", min: 6.5, max: 11.0, color: "var(--accent-indigo)" },
+              { sys: "CMOS 感光與鏡頭", chip: "Sony IMX307 (1080p Starvis) + M12 + IR-Cut", quote: "$5.0–$15.0 (模組)", min: 6.0, max: 9.5, color: "var(--accent-emerald)" },
+              { sys: "60GHz 存在/生命徵象雷達", chip: "TI IWRL6432 (2T3R, LPDS <1.15 mW) + 天線", quote: "$6.0–$9.0 (IC)", min: 4.8, max: 6.5, color: "var(--accent-indigo)" },
+              { sys: "無線通訊與 CSI 主控", chip: "Espressif ESP32-C6 / MediaTek MT7981B (Filogic 820)", quote: "$2.0–$3.0 (C6 模組)", min: 4.5, max: 7.0, color: "var(--accent-cyan)" },
+              { sys: "記憶體與儲存", chip: "512MB–1GB LPDDR4 + 256MB–4GB Flash/eMMC", quote: "—", min: 4.5, max: 6.5, color: "var(--accent-gold)" },
+              { sys: "電源與被動元件", chip: "USB-C PD / 12V DC-DC、PMIC、晶振保護", quote: "—", min: 3.5, max: 5.0, color: "var(--text-muted)" }
+            ]
+          },
+          ndaa: {
+            trackLabel: "NDAA 合規組",
+            totalMin: 81.80, totalMax: 110.50,
+            items: [
+              { sys: "低解析熱陣列", chip: "Melexis MLX90640 (32×24) / 非受限替代陣列", quote: "$35.0–$50.0 (IC)", min: 22.0, max: 28.0, color: "var(--accent-amber)" },
+              { sys: "Edge AI NPU + 視覺 SoC", chip: "Kneron KL630 / KL720 (0.5–1.4 TOPS) + 獨立 ISP", quote: "$50–$150 (KL720 套件)", min: 18.0, max: 24.0, color: "var(--accent-indigo)" },
+              { sys: "PCB、機構與組測 (FATP)", chip: "6 層板、阻燃 ABS 吸頂/壁掛殼、散熱片、燒測", quote: "—", min: 14.0, max: 18.5, color: "var(--text-secondary)" },
+              { sys: "CMOS 感光與鏡頭", chip: "Sony IMX307 / 2K CMOS + M12 定焦 + IR-Cut", quote: "$5.0–$15.0 (模組)", min: 7.0, max: 11.0, color: "var(--accent-emerald)" },
+              { sys: "無線通訊與 CSI 主控", chip: "ESP32-C6 / MediaTek MT7981B + 合規射頻前端", quote: "$2.0–$3.0 / $30+ 整機", min: 6.5, max: 9.5, color: "var(--accent-cyan)" },
+              { sys: "記憶體與儲存", chip: "512MB–1GB LPDDR4 + 256MB–4GB Flash/eMMC", quote: "—", min: 5.5, max: 7.5, color: "var(--accent-gold)" },
+              { sys: "60GHz 存在/生命徵象雷達", chip: "TI IWRL6432 (2T3R, 60GHz) + PCB 貼片天線", quote: "$6.0–$9.0 (IC)", min: 4.8, max: 6.5, color: "var(--accent-indigo)" },
+              { sys: "電源與被動元件", chip: "USB-C PD / 12V DC-DC、PMIC、保護元件", quote: "—", min: 4.0, max: 5.5, color: "var(--text-muted)" }
+            ]
+          }
+        },
+        t2: {
+          title: "Tier 2｜中高階商用（目標 BOM $180–$350 USD）",
+          targetDesc: "智慧建築、銀髮長照養護機構、連鎖零售與商辦節能；整合 2.5GbE PoE+ Wi-Fi 7 AP、3D 點雲雷達與 4–12 TOPS 算力。",
+          msrp: "$490 – $750 USD",
+          margin: "42% – 50%",
+          distExample: {
+            label: "長照機構 1 走廊 + 4 臥室情境（1 台走廊 Wi-Fi 7 Edge AP $165–$210 + 4 個無鏡頭 Pod $135–$165）",
+            totalRange: "$705 – $870 USD",
+            perUnit: "$141 – $174 USD / 房",
+            note: "突破 $180 下限，並使走廊 AP 同時為整層樓提供高速 Wi-Fi 7 上網服務。"
+          },
+          callout: "成本與合規平衡：InfiRay Tiny1-C（256×192）性價比卓越但受限於 NDAA 889；北美/歐洲公部門與大型連鎖醫養機構應採 Teledyne FLIR Lepton 3.5（160×120，<9Hz 出口合規）+ TI IWR6843AOP + QCS6490/CV72。",
+          std: {
+            trackLabel: "高性價比商用組（非 NDAA）",
+            totalMin: 189.00, totalMax: 260.00,
+            items: [
+              { sys: "微型 VOx 熱像模組", chip: "InfiRay Tiny1-C (256×192 12µm, 25Hz)", quote: "$200–$300 (樣品)", min: 78.0, max: 105.0, color: "var(--accent-amber)" },
+              { sys: "Edge AI NPU 主控平台", chip: "Rockchip RK3588 (6 TOPS 三核 NPU, 8nm)", quote: "$45–$60 (IC)", min: 30.0, max: 40.0, color: "var(--accent-indigo)" },
+              { sys: "Wi-Fi 7 + 2.5GbE 網通", chip: "Qualcomm IPQ5424 / MediaTek Filogic 830/880", quote: "$15–$25 (IC 萬片估)", min: 22.0, max: 30.0, color: "var(--accent-cyan)" },
+              { sys: "PCB、散熱與機構組測", chip: "8–10 層 HDI PCB、鋁散熱背板、射頻遮罩", quote: "—", min: 18.0, max: 24.0, color: "var(--text-secondary)" },
+              { sys: "4K Starlight 視覺與光學", chip: "Sony IMX415 / IMX678 + 廣角玻璃鏡 + IR-Cut", quote: "$15–$35 / $30–$70", min: 14.0, max: 20.0, color: "var(--accent-emerald)" },
+              { sys: "記憶體與儲存", chip: "4GB–8GB LPDDR4X/5 + 32GB–64GB 工業 eMMC", quote: "—", min: 11.0, max: 16.0, color: "var(--accent-gold)" },
+              { sys: "60GHz 3D 點雲雷達", chip: "Infineon XENSIV BGT60TR13C (1T3R 非 DSP)", quote: "$10–$20 (IC)", min: 8.0, max: 14.0, color: "var(--accent-indigo)" },
+              { sys: "PoE+ (802.3at) 電源管理", chip: "30W PD 控制器、隔離變壓器、多路 DC-DC", quote: "—", min: 8.0, max: 11.0, color: "var(--text-muted)" }
+            ]
+          },
+          ndaa: {
+            trackLabel: "NDAA 合規企業組",
+            totalMin: 257.00, totalMax: 355.00,
+            items: [
+              { sys: "微型 VOx 熱像模組", chip: "Teledyne FLIR Lepton 3.5 (160×120, NETD <50mK)", quote: "$200–$250 (單顆)", min: 110.0, max: 145.0, color: "var(--accent-amber)" },
+              { sys: "Edge AI NPU 主控平台", chip: "Qualcomm QCS6490 (12 TOPS 裸晶) / Ambarella CV72", quote: "$25–$50 (CV72) / $250+ (SoM)", min: 42.0, max: 65.0, color: "var(--accent-indigo)" },
+              { sys: "Wi-Fi 7 + 2.5GbE 網通", chip: "Qualcomm IPQ5424 / MTK Filogic 830/880 + 2.5G PHY", quote: "$15–$25 (萬片估)", min: 26.0, max: 35.0, color: "var(--accent-cyan)" },
+              { sys: "PCB、散熱與機構組測", chip: "8–10 層 HDI PCB、鋁合金散熱背板、防火 PC/ABS", quote: "—", min: 22.0, max: 29.0, color: "var(--text-secondary)" },
+              { sys: "4K Starlight 視覺與光學", chip: "Sony IMX415 / IMX678 (STARVIS 2) + 低畸變鏡頭", quote: "$15–$35 / $30–$70", min: 20.0, max: 28.0, color: "var(--accent-emerald)" },
+              { sys: "60GHz 3D 點雲雷達", chip: "TI IWR6843AOP (3T4R, 含 C674x DSP 免天線設計)", quote: "$20–$30+ (AOP)", min: 15.0, max: 22.0, color: "var(--accent-indigo)" },
+              { sys: "記憶體與儲存", chip: "4GB–8GB LPDDR4X/5 + 32GB–64GB 工業 eMMC", quote: "—", min: 13.0, max: 19.0, color: "var(--accent-gold)" },
+              { sys: "PoE+ (802.3at) 電源管理", chip: "30W PD 控制器、隔離變壓器、TVS 防突波", quote: "—", min: 9.0, max: 12.0, color: "var(--text-muted)" }
+            ]
+          }
+        },
+        t3: {
+          title: "Tier 3｜工業級 / 關鍵基礎設施（準工業 $550–$1,200+ / 旗艦達 $3,695）",
+          targetDesc: "半導體廠務、高壓變電站、鋰電池儲能站（BESS）、港口與軌道防侵入；支援 -40°C~+85°C 寬溫、IP67、±2°C 測溫與 20–100+ TOPS。",
+          msrp: "$1,650 – $3,200+ USD（準工業專案價）",
+          margin: "48% – 56%",
+          distExample: {
+            label: "變電站/無塵室 1 閘道 + 4 前端情境（1 台防爆 Edge 閘道 Orin NX 16GB $680 + 4 組純感測前端 $430–$550）",
+            totalRange: "$2,400 – $2,880 USD",
+            perUnit: "$600 – $720 USD / 點位",
+            note: "兼顧 100 TOPS 算力共享與熱隔離！將重算力集中於防爆閘道，遠端熱像測溫更準。"
+          },
+          callout: "成本拐點與 77GHz 頻譜紅線：1) FLIR Boson 640 + 4× AWR2243 級聯光機芯即突破 $1,700，欲壓在 $550–$1,200 帶內需採 Seek Mosaic 320×240 + 單晶 AWR2944/雙 IWR6843；2) FCC Part 95 / NCC LP0002 限 77GHz 用於交通運輸與桶槽 TLPR，一般室內工業應採多顆 60GHz 協同！",
+          std: {
+            trackLabel: "準工業組（目標帶內 $649–$960）",
+            totalMin: 649.00, totalMax: 960.00,
+            items: [
+              { sys: "高解析測溫 VOx 核心", chip: "Seek Mosaic Core 320×240 / InfiRay 384×288", quote: "$450–$600 / $800–$1,500", min: 290.0, max: 420.0, color: "var(--accent-amber)" },
+              { sys: "高算力邊緣 AI 模組", chip: "Ambarella CV5 + Carrier（或降規 Orin Nano/NX）", quote: "$60–$120 (CV5 IC)", min: 145.0, max: 220.0, color: "var(--accent-indigo)" },
+              { sys: "IP67 壓鑄鋁殼與紅外視窗", chip: "壓鑄鋁外殼、鍺 (Ge)/ZnSe 穿透窗、黑體廠校", quote: "—", min: 95.0, max: 145.0, color: "var(--text-secondary)" },
+              { sys: "工業寬溫 Wi-Fi 7 / 10G 網通", chip: "MediaTek Filogic 880 / Qualcomm IPQ9574 + 10G PHY", quote: "$25–$60+ (IC 組)", min: 38.0, max: 52.0, color: "var(--accent-cyan)" },
+              { sys: "工業 4K WDR 視覺模組", chip: "Sony IMX678 (STARVIS 2) + 電動變焦 + 除霧加熱片", quote: "$30–$70+ (感測板)", min: 35.0, max: 55.0, color: "var(--accent-emerald)" },
+              { sys: "60/77GHz 4D 成像雷達", chip: "TI AWR2944 (單晶片 4T4R) / 雙 IWR6843", quote: "$30–$55 (AWR2944)", min: 28.0, max: 42.0, color: "var(--accent-indigo)" },
+              { sys: "PoE++ (802.3bt) 與防雷保護", chip: "60W–90W PoE++ PD、寬溫電容、6kV 突波防護", quote: "—", min: 18.0, max: 26.0, color: "var(--text-muted)" }
+            ]
+          },
+          ndaa: {
+            trackLabel: "關鍵基建旗艦組（西方 NDAA/ITAR-free）",
+            totalMin: 2314.00, totalMax: 3695.00,
+            items: [
+              { sys: "高解析測溫 VOx 核心", chip: "Teledyne FLIR Boson 640 測溫版 (640×512, ≤20mK)", quote: "$3,500–$6,000+ (公開)", min: 1450.0, max: 2400.0, color: "var(--accent-amber)" },
+              { sys: "高算力邊緣 AI 模組", chip: "NVIDIA Jetson Orin NX 8GB/16GB (70–157 Sparse TOPS)", quote: "$399–$599+ (模組)", min: 340.0, max: 510.0, color: "var(--accent-indigo)" },
+              { sys: "60/77GHz 4D 成像雷達", chip: "4× TI AWR2243 Cascade (12T16R 86ch) + DSP", quote: "$4,000+ (EVM) / $160+ (4 IC)", min: 240.0, max: 350.0, color: "var(--accent-indigo)" },
+              { sys: "IP67 壓鑄鋁殼與紅外視窗", chip: "IP67 防爆壓鑄鋁殼、Ge/ZnSe 視窗、黑體多點校準", quote: "—", min: 150.0, max: 240.0, color: "var(--text-secondary)" },
+              { sys: "工業寬溫 Wi-Fi 7 / 10G 網通", chip: "Qualcomm IPQ9574 + QCN9274 + 10G PHY", quote: "$35–$60+ (IC 組)", min: 55.0, max: 75.0, color: "var(--accent-cyan)" },
+              { sys: "工業 4K WDR 視覺模組", chip: "Sony IMX678 (STARVIS 2) + 全玻璃電動變焦 + 加熱", quote: "$30–$70+ (感測板)", min: 55.0, max: 85.0, color: "var(--accent-emerald)" },
+              { sys: "PoE++ (802.3bt) 與防雷保護", chip: "60W–90W PoE++ PD、寬溫隔離與 6kV 突波防護", quote: "—", min: 24.0, max: 35.0, color: "var(--text-muted)" }
+            ]
+          }
+        }
+      };
+
+      const DEPLOY_COMPARISON = [
+        {
+          dim: "1. RF / EMI 干擾與天線隔離",
+          aio: "高難度：緊湊 PCB 內 DC-DC/PCIe/MIPI 諧波易耦合進入雷達 IF；60GHz 波長 5mm 須用低介電 PC/ABS/PP 透波殼，壁厚公差 ±0.05mm 並部署 EBG 與 Via Fence。",
+          dist: "低難度：射頻 AP 與雷達/攝影機空間相隔數公尺，徹底消除 PCB 級近場耦合與高速諧波干擾。"
+        },
+        {
+          dim: "2. 熱管理與 VOx Thermal 飄移",
+          aio: "高風險：Wi-Fi 7 (18–48W) + NPU 密封吸頂機殼內溫飆至 55–75°C，引發 VOx FPA 基準溫度飄移，須隔熱腔體、ATC 補償與頻繁機械快門 FFC（瞬時 650 mW）。",
+          dist: "低風險：獨立微型熱像子節點總功耗僅 0.5–2 W，自發熱極低，測溫精度與長期穩定度遠優於整合機。"
+        },
+        {
+          dim: "3. PoE 供電瓦數瓶頸 (IEEE 802.3)",
+          aio: "強制 PoE++ 802.3bt Type 3/4（60–90 W PSE / 51–71.3 W PD）；一般 PoE+ (25.5 W) 會觸發降頻陷阱，須升級大樓交換機。",
+          dist: "高彈性：主匯流 AP 用 PoE+ / PoE++，其餘感測子機由既有多個 802.3af (15.4 W) 埠分攤，或採電池供電無線標籤。"
+        },
+        {
+          dim: "4. 幾何視角衝突（Mounting Conflict）",
+          aio: "受限且衝突：AP 須天花板置中水平安裝，但 Camera/Thermal 正下視僅見人頭頂，須設獨立 20°–35° 雲台或改採壁掛。",
+          dist: "完全解耦最佳化：AP 自由裝於天花板射頻最佳點，Camera/Thermal/Radar 裝於牆角 2.4–3.2m 俯仰 15°–45°。"
+        },
+        {
+          dim: "5. 現場標定與安裝工時",
+          aio: "極低（Zero-Touch）：工廠產線執行剛體外參預標定，現場拉單條網路線即插即用，適合新建案（Greenfield）。",
+          dist: "中高：須現場執行 IEEE 1588 PTP (<1 µs) 與主動加熱棋盤+三面角反射器/mmWave 自監督空間校準。"
+        },
+        {
+          dim: "6. 既有設備利舊（Brownfield）",
+          aio: "無利舊能力：須整機替換部署，且單一零件老化損壞可能需拆換整台模組。",
+          dist: "極佳（Phase 1 切入首選）：Edge 閘道直接納管客戶現有 ONVIF/RTSP IP Camera 與傳統 PoE 網段，無須淘汰舊投資。"
+        }
+      ];
+
+      const ROI_SCENARIOS = [
+        {
+          id: "care",
+          tiers: ["t1", "t2"],
+          badge: "情境 A｜Tier 2 分散式方案",
+          title: "100 床規模銀髮養護機構",
+          cost: "HaaS $55/床/月 → 年投入 $66,000 USD（或買斷 CapEx $42K + 年費 $24K）",
+          benefit: "預防 2 起嚴重髖部骨折跌倒訴訟省 $60K–$70K + 取代夜間巡房省 150–200 工時/月（年省 $36K–$48K）",
+          payback: "~7.5 個月回本",
+          subNote: "僅計算直接醫療與訴訟避險亦可在 11–12 個月內回本"
+        },
+        {
+          id: "ind",
+          tiers: ["t3"],
+          badge: "情境 B｜Tier 3 工業 PdM 方案",
+          title: "20 點位半導體廠務與變電室",
+          cost: "20 點含安裝 $44,000 + 首年 PdM $10,000 → 首年總投入 $54,000 USD",
+          benefit: "製造業非計畫停機損失 $50K–$260K+/小時；提前預警 1 次電弧閃絡/軸承鎖死避開 2 小時停機（保守省 $120K–$180K）",
+          payback: "3–6 個月完全回本",
+          subNote: "一般工廠標準情境平均 12–18 個月回本；減 35%–45% 非計畫停機"
+        },
+        {
+          id: "hvac",
+          tiers: ["t1", "t2"],
+          badge: "情境 C｜AP-as-a-Sensor 商辦",
+          title: "智慧商辦微氣候 HVAC 節能",
+          cost: "複用既有天花板 Wi-Fi AP 與 PoE 佈線，僅疊加輕量雷達＋低階熱陣列（單點改造成本極低）",
+          benefit: "消除靜坐 False-Off，無人關機延遲由 30–60 分鐘縮至 5–10 分鐘，釋放 15%–25% 空調照明節能",
+          payback: "1.5 – 2.5 年回本",
+          subNote: "結合保險折扣方案（10%–20% 保費減免）可進一步縮短回收期"
+        }
+      ];
+
+      /* =========================================================================
+       * 2. STATE & HELPERS
+       * ========================================================================= */
+
+      const state = {
+        theme: "dark",
+        view: "all",
+        m1: { wifi: true, camera: true, thermal: true, radar: true },
+        m2: { domain: "all", sort: "total", selectedCode: "A1", expandedTop5: new Set(["A1"]) },
+        m3: { scenario: "L0" },
+        m4: { deploy: "aio", tier: "t2", comp: "std" }
+      };
+
+      function fmtMoney(n) {
+        return "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: n % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 });
+      }
+
+      /* =========================================================================
+       * 3. MODULE 1: QUAD-MODALITY FUSION ENGINE & RADAR CHART
+       * ========================================================================= */
+
+      function computeFusionMetrics(m) {
+        const active = MODALITIES.filter(x => m[x.id]);
+        const count = active.length;
+        if (count === 0) {
+          return {
+            count: 0,
+            scores: { spatial: 0, penetration: 0, vitals: 0, thermal: 0, privacy: 10, coverage: 0 },
+            warnings: {
+              level: "status-danger",
+              title: "尚未啟用任何感測模態（系統離線）",
+              items: ["請至少開啟一項感測器或網通節點，以觀察物理特性與工程盲區變化。"]
+            }
+          };
+        }
+
+        // Compute physics-grounded fused scores from active modalities
+        const maxOf = key => Math.max(...active.map(x => x.vector[key]));
+        let spatial = maxOf("spatial");
+        let penetration = maxOf("penetration");
+        let vitals = maxOf("vitals");
+        let thermal = maxOf("thermal");
+        let coverage = maxOf("coverage");
+
+        // Cross-modal physics synergies (strictly reflecting Table 1-1 & 1-2)
+        if (m.camera && m.radar) spatial = Math.min(10, spatial + 0.2); // 2D semantic + 3D depth/velocity
+        else if (m.camera && m.wifi) spatial = Math.min(9.9, spatial + 0.1);
+        else if (m.radar && m.thermal && !m.camera) spatial = 7.4; // 3D + thermal contour without semantic ID
+        else if (m.wifi && m.radar && !m.camera && !m.thermal) spatial = 7.1;
+
+        if (m.wifi && m.radar) penetration = Math.min(9.9, penetration + 0.2); // Sub-7GHz wall + 60GHz smoke/vapor
+        if (m.thermal && m.radar) penetration = Math.min(9.9, penetration + 0.1);
+
+        if (m.radar && m.thermal) vitals = Math.min(9.9, vitals + 0.2); // Breathing/HR + fever temp
+        else if (m.wifi && m.thermal && !m.radar) vitals = 6.8;
+        else if (m.wifi && m.radar && !m.thermal) vitals = 9.7;
+
+        if (m.thermal && m.camera) thermal = Math.min(10, thermal + 0.2); // Radiometric temp + semantic ROI eliminates sun/brake glare
+
+        // Backbone & coverage synergy: Wi-Fi AP as triple-role backbone reduces TCO & connects rooms
+        if (m.wifi && count >= 2) {
+          coverage = Math.min(9.6, 8.2 + count * 0.35);
+        } else if (!m.wifi && count >= 2) {
+          // Isolated sensors without wireless hub need extra gateways/cabling
+          coverage = Math.max(4.5, maxOf("coverage") - 1.0);
+        }
+
+        // Privacy-by-Design curve (Section 1.3 & 2.3):
+        let privacy;
+        if (!m.camera) {
+          if (m.wifi && m.radar && !m.thermal) privacy = 9.6;
+          else if (m.thermal && count === 1) privacy = 7.8;
+          else if (m.thermal) privacy = 9.0;
+          else privacy = maxOf("privacy");
+        } else {
+          // Camera is ON
+          if (m.wifi && m.radar && m.thermal) privacy = 9.2; // Full L0->L1->L2->L3 Cascade
+          else if (m.wifi && m.radar) privacy = 8.6; // L0/L1 trigger, missing thermal confirmation
+          else if (m.wifi || m.radar) privacy = 7.4; // Partial trigger reduces 24/7 recording
+          else if (m.thermal) privacy = 3.2; // Always-on bi-spectrum still violates bathroom/GDPR Art.5
+          else privacy = 1.5; // Camera alone = 24/7 optical recording high risk
+        }
+
+        const scores = {
+          spatial: Number(spatial.toFixed(1)),
+          penetration: Number(penetration.toFixed(1)),
+          vitals: Number(vitals.toFixed(1)),
+          thermal: Number(thermal.toFixed(1)),
+          privacy: Number(privacy.toFixed(1)),
+          coverage: Number(coverage.toFixed(1))
+        };
+
+        // Residual engineering blind spots from Section 1.3 (Table 1-2)
+        const warnItems = [];
+        if (count === 4) {
+          return {
+            count: 4,
+            scores,
+            warnings: {
+              level: "status-ok",
+              title: "✓ 四模態物理互補閉環已達成（零單點盲區）",
+              items: [
+                "穿牆/濃煙/全暗/玻璃全覆蓋：Wi-Fi 802.11bf 負責跨牆與全域骨幹，mmWave 穿透濃煙蒸氣，Thermal 與 Camera 互補黑暗與日間語意。",
+                "Privacy-by-Design L0→L3 就緒：平時僅無線與非視覺常駐，L2 僅於 TEE Volatile RAM (<100ms) 提取骨架，全面解除 GDPR / HIPAA 阻礙。",
+                "熱失控＋生命徵象＋語意取證閉環：可同時攔截 Stage 1 電氣熱異常、量測亞毫米呼吸心跳並排除動物/光影誤報。"
+              ]
+            }
+          };
+        }
+
+        if (!m.thermal) {
+          warnItems.push("熱異常與早期火災全盲：配電盤過熱、電池熱失控 Stage 1（開火前數分鐘）與人員發燒完全無法感知；且無法靠 34°C–37°C 體溫過濾掉落棉被、晃動電纜或玻璃外走廊干擾。");
+        }
+        if (!m.radar) {
+          warnItems.push("靜態呼吸心跳與濃煙/蒸氣穿透缺口：缺乏亞毫米級胸腔呼吸驗證（±1–2 rpm）與直接徑向速度向量（Doppler），在衛浴水蒸氣、火災濃黑煙或靜坐辦公（PIR/CSI 盲區）下易誤漏報。");
+        }
+        if (!m.camera) {
+          warnItems.push("高語意辨識與法律取證缺口：無法識別車牌、人臉、安全帽/PPE 配戴或辨別「煞車碟盤餘熱 vs 電池包起火」，事故後亦缺少 L3 加密影像佐證。");
+        } else if (!m.wifi && !m.radar) {
+          warnItems.push("隱私紅線與高頻寬風險：缺乏無線與雷達 L0–L1 先行觸發，IP Camera 必須 24/7 常駐錄影（4–8 Mbps/路），直接觸犯 GDPR Art.5/Art.9 且無法進入衛浴/臥室。");
+        }
+        if (!m.wifi) {
+          warnItems.push("缺乏通訊骨幹與跨牆/跨房預警：系統退化為局部視距孤島，無法透過 Sub-7GHz 穿牆預警或 UWB (10–30 cm) 執行巡檢員白名單解防，且無法利舊既有 AP 降本。");
+        }
+
+        const level = count >= 3 ? "status-warn" : "status-danger";
+        return {
+          count,
+          scores,
+          warnings: {
+            level,
+            title: `⚠ 偵測到 ${warnItems.length} 項殘餘工程與合規盲區（僅啟用 ${count} / 4 模態）`,
+            items: warnItems
+          }
+        };
+      }
+
+      function renderRadarSvg(scores) {
+        const cx = 290, cy = 215, maxR = 122;
+        const angles = [-90, -30, 30, 90, 150, 210].map(deg => deg * Math.PI / 180);
+
+        const pt = (r, idx) => {
+          const x = cx + r * Math.cos(angles[idx]);
+          const y = cy + r * Math.sin(angles[idx]);
+          return [Number(x.toFixed(1)), Number(y.toFixed(1))];
+        };
+
+        // Rings (2, 4, 6, 8, 10)
+        let gridSvg = "";
+        [2, 4, 6, 8, 10].forEach(level => {
+          const r = (level / 10) * maxR;
+          const pts = angles.map((_, i) => pt(r, i).join(",")).join(" ");
+          gridSvg += `<polygon points="${pts}" fill="none" stroke="var(--border-subtle)" stroke-width="${level === 10 ? 1.4 : 1}" />`;
+        });
+
+        // Axis spokes
+        let spokesSvg = "";
+        angles.forEach((_, i) => {
+          const [x, y] = pt(maxR, i);
+          spokesSvg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="var(--border-subtle)" stroke-width="1" />`;
+        });
+
+        // Full 4-Modality Benchmark polygon (dashed reference)
+        const fullBench = [9.9, 9.9, 9.9, 10.0, 9.2, 9.6];
+        const benchPts = fullBench.map((v, i) => pt((v / 10) * maxR, i).join(",")).join(" ");
+
+        // Active polygon
+        const activeVals = RADAR_AXES.map(ax => scores[ax.key]);
+        const activeCoords = activeVals.map((v, i) => pt((v / 10) * maxR, i));
+        const activePtsStr = activeCoords.map(c => c.join(",")).join(" ");
+
+        // Labels around vertices
+        const labelOffsets = [
+          { dx: 0, dy: -22, anchor: "middle" },
+          { dx: 16, dy: -6, anchor: "start" },
+          { dx: 16, dy: 10, anchor: "start" },
+          { dx: 0, dy: 24, anchor: "middle" },
+          { dx: -16, dy: 10, anchor: "end" },
+          { dx: -16, dy: -6, anchor: "end" }
+        ];
+
+        let labelsSvg = "";
+        RADAR_AXES.forEach((ax, i) => {
+          const [vx, vy] = pt(maxR, i);
+          const off = labelOffsets[i];
+          const lx = vx + off.dx;
+          const ly = vy + off.dy;
+          labelsSvg += `
+            <text x="${lx}" y="${ly}" text-anchor="${off.anchor}" fill="var(--text-primary)" font-size="12" font-weight="700">${ax.label}</text>
+            <text x="${lx}" y="${ly + 15}" text-anchor="${off.anchor}" fill="var(--accent-cyan)" font-size="11.5" font-weight="800" class="mono">${scores[ax.key].toFixed(1)} / 10</text>
+          `;
+        });
+
+        let dotsSvg = "";
+        activeCoords.forEach(([x, y]) => {
+          dotsSvg += `<circle cx="${x}" cy="${y}" r="4.5" fill="var(--accent-cyan)" stroke="var(--bg-card)" stroke-width="2" />`;
+        });
+
+        return `
+          <svg viewBox="0 0 580 430" role="img" aria-label="四模態能力六維雷達圖">
+            <defs>
+              <linearGradient id="radarFillGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="var(--accent-cyan)" stop-opacity="0.32" />
+                <stop offset="100%" stop-color="var(--accent-indigo)" stop-opacity="0.26" />
+              </linearGradient>
+            </defs>
+            ${gridSvg}
+            ${spokesSvg}
+            <polygon points="${benchPts}" fill="none" stroke="var(--text-muted)" stroke-width="1.2" stroke-dasharray="4 4" opacity="0.65" />
+            <polygon class="radar-poly" points="${activePtsStr}" fill="url(#radarFillGrad)" stroke="var(--accent-cyan)" stroke-width="2.4" stroke-linejoin="round" />
+            ${dotsSvg}
+            ${labelsSvg}
+          </svg>
+        `;
+      }
+
+      function renderModule1() {
+        const listEl = document.getElementById("modalityToggleList");
+        listEl.innerHTML = MODALITIES.map(mod => {
+          const isOn = state.m1[mod.id];
+          const specBadges = mod.specs.map(s => `<span class="badge badge-muted">${s}</span>`).join("");
+          return `
+            <div class="mod-toggle-card ${isOn ? "on" : ""}" style="--mod-color:${mod.color};" data-mod="${mod.id}" role="switch" aria-checked="${isOn}" tabindex="0">
+              <div class="mod-left">
+                <div class="mod-icon-box">${mod.icon}</div>
+                <div>
+                  <div class="mod-name">${mod.name}</div>
+                  <div class="mod-sub">${mod.sub}</div>
+                  <div class="mod-specs">${specBadges}</div>
+                </div>
+              </div>
+              <div class="switch" aria-hidden="true"></div>
+            </div>
+          `;
+        }).join("");
+
+        const metrics = computeFusionMetrics(state.m1);
+        document.getElementById("activeCountBadge").textContent = `已啟用 ${metrics.count} / 4 模態`;
+
+        const bsEl = document.getElementById("blindspotPanel");
+        bsEl.className = `blindspot-panel ${metrics.warnings.level}`;
+        bsEl.innerHTML = `
+          <div class="blindspot-title">${metrics.warnings.title}</div>
+          <ul class="blindspot-list">${metrics.warnings.items.map(i => `<li>${i}</li>`).join("")}</ul>
+        `;
+
+        document.getElementById("radarSvgWrap").innerHTML = renderRadarSvg(metrics.scores);
+
+        document.getElementById("dimScoresGrid").innerHTML = RADAR_AXES.map(ax => `
+          <div class="dim-score-box">
+            <span style="color:var(--text-secondary);">${ax.label}</span>
+            <span class="dim-score-val mono">${metrics.scores[ax.key].toFixed(1)}</span>
+          </div>
+        `).join("");
+
+        // Evaluate unlocked applications
+        let fullCount = 0;
+        let unlockedCount = 0;
+        const nameOf = id => MODALITIES.find(x => x.id === id).shortName;
+
+        const cardsHtml = APPLICATIONS.map(app => {
+          const hasFull = app.fullReq.every(id => state.m1[id]);
+          const hasMin = app.minReq.every(id => state.m1[id]);
+          const missingFull = app.fullReq.filter(id => !state.m1[id]).map(nameOf);
+          const missingMin = app.minReq.filter(id => !state.m1[id]).map(nameOf);
+
+          let cls = "locked";
+          let statusBadge = '<span class="badge badge-muted">未解鎖</span>';
+          let note = `缺乏核心感測：${missingMin.join("、")}`;
+
+          if (hasFull) {
+            fullCount++;
+            unlockedCount++;
+            cls = "full";
+            statusBadge = '<span class="badge badge-emerald">完整閉環</span>';
+            note = `加權 ${app.total} 分｜四模態零盲區協同`;
+          } else if (hasMin) {
+            unlockedCount++;
+            cls = "partial";
+            statusBadge = '<span class="badge badge-amber">基礎解鎖</span>';
+            note = `核心可運作，尚缺「${missingFull.join("、")}」補齊閉環`;
+          }
+
+          return `
+            <div class="unlock-item ${cls}">
+              <div class="unlock-item-head">
+                <span class="unlock-item-title"><span class="mono">${app.code}</span> · ${app.shortName}</span>
+                ${statusBadge}
+              </div>
+              <div class="unlock-item-note">${note}</div>
+            </div>
+          `;
+        }).join("");
+
+        document.getElementById("fullUnlockBadge").textContent = `完整閉環：${fullCount} / 15`;
+        document.getElementById("basicUnlockBadge").textContent = `已解鎖（含基礎）：${unlockedCount} / 15`;
+        document.getElementById("unlockGrid").innerHTML = cardsHtml;
+      }
+
+      /* =========================================================================
+       * 4. MODULE 2: 15 APPLICATIONS EXPLORER & TOP 5 CARDS
+       * ========================================================================= */
+
+      function renderModule2() {
+        let filtered = APPLICATIONS.filter(a => state.m2.domain === "all" || a.domain === state.m2.domain);
+        const s = state.m2.sort;
+        filtered = filtered.slice().sort((a, b) => {
+          if (s === "code") return a.code.localeCompare(b.code);
+          return b[s] - a[s];
+        });
+
+        const domainBadgeClass = {
+          care: "badge-cyan",
+          security: "badge-indigo",
+          factory: "badge-amber",
+          infra: "badge-emerald"
+        };
+
+        const scoreCell = val => `
+          <div class="score-pill-bar">
+            <span class="mono" style="font-weight:700;">${val.toFixed(1)}</span>
+            <span class="mini-track"><span class="mini-fill" style="width:${val * 10}%;"></span></span>
+          </div>
+        `;
+
+        document.getElementById("appsTableBody").innerHTML = filtered.map(app => {
+          const isSel = state.m2.selectedCode === app.code;
+          const flagBadge = app.flagship
+            ? `<span class="badge badge-gold">★ Flagship #${app.flagship}</span>`
+            : `<span class="badge badge-muted">候補</span>`;
+          return `
+            <tr class="app-row ${isSel ? "selected-row" : ""}" data-code="${app.code}">
+              <td class="mono" style="font-weight:800;">#${app.rank}</td>
+              <td class="mono" style="font-weight:700;color:var(--accent-cyan);">${app.code}</td>
+              <td><span class="badge ${domainBadgeClass[app.domain]}">${app.domainLabel}</span></td>
+              <td style="font-weight:600;min-width:210px;">${app.name}</td>
+              <td>${scoreCell(app.need)}</td>
+              <td>${scoreCell(app.tech)}</td>
+              <td>${scoreCell(app.privacy)}</td>
+              <td>${scoreCell(app.roi)}</td>
+              <td>${scoreCell(app.feasibility)}</td>
+              <td class="mono" style="font-weight:800;font-size:13.5px;color:var(--accent-cyan);">${app.total.toFixed(1)}</td>
+              <td>${flagBadge}</td>
+            </tr>
+          `;
+        }).join("");
+
+        // Render Inspector for selected row
+        const sel = APPLICATIONS.find(a => a.code === state.m2.selectedCode) || APPLICATIONS[0];
+        document.getElementById("appInspector").innerHTML = `
+          <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;">
+            <div>
+              <span class="badge badge-cyan mono">${sel.code}</span>
+              <strong style="font-size:14.5px;margin-left:6px;">${sel.name}</strong>
+            </div>
+            <span class="badge ${sel.flagship ? "badge-gold" : "badge-muted"} mono">總分 ${sel.total.toFixed(1)} / 100</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;font-size:12.5px;">
+            <div class="detail-box">
+              <h4>核心觸發場景與痛點</h4>
+              <p style="margin:0;color:var(--text-secondary);">${sel.trigger}</p>
+              <h4 style="margin-top:10px;">核心價值主張</h4>
+              <p style="margin:0;color:var(--accent-emerald);font-weight:600;">${sel.value}</p>
+            </div>
+            <div class="detail-box">
+              <h4>四模態協同分工（表 1-3）</h4>
+              <div class="modality-role-row">
+                <div class="modality-role-item" style="--role-color:var(--accent-cyan);">${sel.roles.wifi}</div>
+                <div class="modality-role-item" style="--role-color:var(--accent-indigo);">${sel.roles.radar}</div>
+                <div class="modality-role-item" style="--role-color:var(--accent-amber);">${sel.roles.thermal}</div>
+                <div class="modality-role-item" style="--role-color:var(--accent-emerald);">${sel.roles.camera}</div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Render Top 5 Accordion Cards
+        document.getElementById("top5List").innerHTML = TOP5_DETAILS.map(item => {
+          const isExp = state.m2.expandedTop5.has(item.code);
+          return `
+            <article class="flagship-card ${isExp ? "expanded" : ""}" data-top5="${item.code}">
+              <button class="flagship-trigger" type="button" aria-expanded="${isExp}">
+                <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+                  <div class="flagship-rank">#${item.rank}</div>
+                  <div>
+                    <div style="font-size:14.5px;font-weight:700;">
+                      <span class="mono" style="color:var(--accent-cyan);">[${item.code}]</span> ${item.title}
+                    </div>
+                    <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">${item.subScores}</div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span class="badge badge-gold mono" style="font-size:12.5px;padding:5px 10px;">${item.score.toFixed(1)} 分</span>
+                  <span style="font-size:12px;color:var(--text-secondary);font-weight:700;">${isExp ? "▲ 收合" : "▼ 展開"}</span>
+                </div>
+              </button>
+              <div class="flagship-body">
+                <div class="flagship-grid">
+                  <div class="detail-box">
+                    <h4 style="color:var(--accent-rose);">1. 單／雙模態失效痛點</h4>
+                    <ul>${item.painPoints.map(p => `<li>${p}</li>`).join("")}</ul>
+                  </div>
+                  <div class="detail-box">
+                    <h4 style="color:var(--accent-cyan);">2. 四模態感知鏈具體分工</h4>
+                    <div class="modality-role-row">
+                      ${item.roles.map(r => `
+                        <div class="modality-role-item" style="--role-color:${r.color};">
+                          <strong style="color:var(--text-primary);">${r.tag}：</strong>${r.text}
+                        </div>
+                      `).join("")}
+                    </div>
+                  </div>
+                  <div class="detail-box">
+                    <h4 style="color:var(--accent-indigo);">3. L0 → L3 Privacy-by-Design 觸發流程</h4>
+                    <ul>${item.flow.map(f => `<li>${f}</li>`).join("")}</ul>
+                  </div>
+                  <div class="detail-box">
+                    <h4 style="color:var(--accent-emerald);">4. 融合後量化效益指標</h4>
+                    <ul>${item.kpis.map(k => `<li>${k}</li>`).join("")}</ul>
+                  </div>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join("");
+      }
+
+      /* =========================================================================
+       * 5. MODULE 3: PRIVACY-BY-DESIGN TIERED WAKEUP SIMULATOR
+       * ========================================================================= */
+
+      function renderFlowSvg(sc) {
+        const hasNode = id => sc.activeNodes.includes(id);
+        const hasLine = id => sc.activeLines.includes(id);
+
+        const nodeStyle = (id, activeColor) => {
+          const on = hasNode(id);
+          return {
+            fill: on ? "var(--bg-elevated)" : "var(--bg-inset)",
+            stroke: on ? activeColor : "var(--border-subtle)",
+            opacity: on ? "1" : "0.45",
+            sw: on ? "2.2" : "1.2"
+          };
+        };
+
+        const lineAttrs = (id, color) => {
+          const on = hasLine(id);
+          return on
+            ? `stroke="${color}" stroke-width="2.6" class="flow-line-active" opacity="0.95"`
+            : `stroke="var(--border-subtle)" stroke-width="1.2" stroke-dasharray="3 3" opacity="0.35"`;
+        };
+
+        const nw = nodeStyle("wifi", "var(--accent-cyan)");
+        const nr = nodeStyle("radar", "var(--accent-indigo)");
+        const nt = nodeStyle("thermal", "var(--accent-amber)");
+        const nc = nodeStyle("camera", "var(--accent-emerald)");
+        const ns = nodeStyle("sync", "var(--accent-cyan)");
+        const nram = nodeStyle("ram", "var(--accent-amber)");
+        const ne = nodeStyle("edge", "var(--accent-indigo)");
+        const nm = nodeStyle("meta", "var(--accent-emerald)");
+        const nf = nodeStyle("forensic", "var(--accent-rose)");
+        const nb = nodeStyle("backhaul", "var(--accent-cyan)");
+
+        return `
+          <svg class="flow-svg" viewBox="0 0 940 310" role="img" aria-label="Privacy-by-Design 分級喚醒節點流向圖">
+            <!-- Connection Paths -->
+            <path d="M 205 42 C 245 42, 245 140, 278 140" fill="none" ${lineAttrs("w-s", "var(--accent-cyan)")} />
+            <path d="M 205 114 C 245 114, 245 145, 278 145" fill="none" ${lineAttrs("r-s", "var(--accent-indigo)")} />
+            <path d="M 205 186 C 245 186, 245 155, 278 155" fill="none" ${lineAttrs("t-s", "var(--accent-amber)")} />
+            <path d="M 205 258 C 245 258, 245 165, 278 165" fill="none" ${lineAttrs("c-s", "var(--accent-emerald)")} />
+
+            <line x1="422" y1="138" x2="472" y2="85" ${lineAttrs("s-e", "var(--accent-indigo)")} />
+            <line x1="422" y1="168" x2="472" y2="215" ${lineAttrs("s-ram", "var(--accent-amber)")} />
+            <line x1="552" y1="185" x2="552" y2="125" ${lineAttrs("ram-e", "var(--accent-amber)")} />
+
+            <path d="M 632 82 C 668 82, 668 82, 694 82" fill="none" ${lineAttrs("e-m", "var(--accent-emerald)")} />
+            <path d="M 632 98 C 665 98, 665 210, 694 210" fill="none" ${lineAttrs("e-f", "var(--accent-rose)")} />
+            <line x1="632" y1="222" x2="694" y2="222" ${lineAttrs("ram-f", "var(--accent-rose)")} />
+
+            <path d="M 830 82 C 855 82, 855 145, 870 145" fill="none" ${lineAttrs("m-b", "var(--accent-emerald)")} />
+            <path d="M 830 218 C 855 218, 855 155, 870 155" fill="none" ${lineAttrs("f-b", "var(--accent-rose)")} />
+
+            <!-- Left Column: 4 Sensors -->
+            <g opacity="${nw.opacity}">
+              <rect x="16" y="16" width="189" height="52" rx="9" fill="${nw.fill}" stroke="${nw.stroke}" stroke-width="${nw.sw}" />
+              <text x="28" y="37" fill="var(--text-primary)" font-size="12" font-weight="700">L0 無線感測 (CSI / BLE)</text>
+              <text x="28" y="55" fill="var(--accent-cyan)" font-size="10.5" class="mono">${sc.sensors.wifi.state}</text>
+            </g>
+
+            <g opacity="${nr.opacity}">
+              <rect x="16" y="88" width="189" height="52" rx="9" fill="${nr.fill}" stroke="${nr.stroke}" stroke-width="${nr.sw}" />
+              <text x="28" y="109" fill="var(--text-primary)" font-size="12" font-weight="700">L1 60GHz mmWave 雷達</text>
+              <text x="28" y="127" fill="var(--accent-indigo)" font-size="10.5" class="mono">${sc.sensors.radar.state}</text>
+            </g>
+
+            <g opacity="${nt.opacity}">
+              <rect x="16" y="160" width="189" height="52" rx="9" fill="${nt.fill}" stroke="${nt.stroke}" stroke-width="${nt.sw}" />
+              <text x="28" y="181" fill="var(--text-primary)" font-size="12" font-weight="700">L1 VOx Thermal 熱像</text>
+              <text x="28" y="199" fill="var(--accent-amber)" font-size="10.5" class="mono">${sc.sensors.thermal.state}</text>
+            </g>
+
+            <g opacity="${nc.opacity}">
+              <rect x="16" y="232" width="189" height="52" rx="9" fill="${nc.fill}" stroke="${nc.stroke}" stroke-width="${nc.sw}" />
+              <text x="28" y="253" fill="var(--text-primary)" font-size="12" font-weight="700">L2/L3 RGB / Starlight</text>
+              <text x="28" y="271" fill="var(--accent-emerald)" font-size="10.5" class="mono">${sc.sensors.camera.state}</text>
+            </g>
+
+            <!-- Sync Layer -->
+            <g opacity="${ns.opacity}">
+              <rect x="278" y="110" width="144" height="86" rx="10" fill="${ns.fill}" stroke="${ns.stroke}" stroke-width="${ns.sw}" />
+              <text x="350" y="138" text-anchor="middle" fill="var(--text-primary)" font-size="12" font-weight="700">硬體時空同步層</text>
+              <text x="350" y="157" text-anchor="middle" fill="var(--text-secondary)" font-size="10.5">IEEE 1588 PTP (&lt;1µs)</text>
+              <text x="350" y="174" text-anchor="middle" fill="var(--accent-cyan)" font-size="10.5" class="mono">GPIO SYNC_IN (2ms)</text>
+            </g>
+
+            <!-- Edge NPU + Volatile RAM -->
+            <g opacity="${ne.opacity}">
+              <rect x="472" y="42" width="160" height="83" rx="10" fill="${ne.fill}" stroke="${ne.stroke}" stroke-width="${ne.sw}" />
+              <text x="552" y="68" text-anchor="middle" fill="var(--text-primary)" font-size="12" font-weight="700">Edge NPU &amp; 狀態機</text>
+              <text x="552" y="87" text-anchor="middle" fill="var(--text-secondary)" font-size="10.5">Cross-Attention + D-S</text>
+              <text x="552" y="105" text-anchor="middle" fill="var(--accent-indigo)" font-size="10.5" class="mono">YOLOv8-pose / 骨架</text>
+            </g>
+
+            <g opacity="${nram.opacity}">
+              <rect x="472" y="185" width="160" height="74" rx="10" fill="${nram.fill}" stroke="${nram.stroke}" stroke-width="${nram.sw}" />
+              <text x="552" y="209" text-anchor="middle" fill="var(--text-primary)" font-size="12" font-weight="700">TEE Volatile RAM</text>
+              <text x="552" y="227" text-anchor="middle" fill="var(--accent-amber)" font-size="10.5">不寫入 SSD / Flash</text>
+              <text x="552" y="244" text-anchor="middle" fill="var(--text-secondary)" font-size="10" class="mono">&lt;100ms 銷毀 / 5-10s Pre-roll</text>
+            </g>
+
+            <!-- Outputs -->
+            <g opacity="${nm.opacity}">
+              <rect x="694" y="48" width="136" height="68" rx="10" fill="${nm.fill}" stroke="${nm.stroke}" stroke-width="${nm.sw}" />
+              <text x="762" y="73" text-anchor="middle" fill="var(--text-primary)" font-size="11.5" font-weight="700">L0–L2 匿名中繼</text>
+              <text x="762" y="91" text-anchor="middle" fill="var(--accent-emerald)" font-size="10.5" class="mono">${sc.uplinkBwLabel.split("（")[0]}</text>
+              <text x="762" y="106" text-anchor="middle" fill="var(--text-secondary)" font-size="10">JSON 骨架 / 心跳</text>
+            </g>
+
+            <g opacity="${nf.opacity}">
+              <rect x="694" y="180" width="136" height="76" rx="10" fill="${nf.fill}" stroke="${nf.stroke}" stroke-width="${nf.sw}" />
+              <text x="762" y="205" text-anchor="middle" fill="var(--text-primary)" font-size="11.5" font-weight="700">L3 授權加密存證</text>
+              <text x="762" y="223" text-anchor="middle" fill="var(--accent-rose)" font-size="10.5" class="mono">AES-256-GCM</text>
+              <text x="762" y="240" text-anchor="middle" fill="var(--text-secondary)" font-size="10">RBAC 雙鑰 + 動態遮罩</text>
+            </g>
+
+            <!-- Backhaul -->
+            <g opacity="${nb.opacity}">
+              <rect x="870" y="95" width="56" height="114" rx="10" fill="${nb.fill}" stroke="${nb.stroke}" stroke-width="${nb.sw}" />
+              <text x="898" y="140" text-anchor="middle" fill="var(--text-primary)" font-size="11" font-weight="700">Wi-Fi 7</text>
+              <text x="898" y="157" text-anchor="middle" fill="var(--accent-cyan)" font-size="10" class="mono">MLO</text>
+              <text x="898" y="174" text-anchor="middle" fill="var(--text-secondary)" font-size="9.5">PoE++</text>
+            </g>
+          </svg>
+        `;
+      }
+
+      function renderModule3() {
+        document.getElementById("scenarioTabs").innerHTML = SCENARIOS.map(sc => {
+          const active = state.m3.scenario === sc.id;
+          return `
+            <button class="scenario-btn ${active ? "active" : ""}" style="--sc-color:${sc.color};--sc-soft:${sc.soft};" data-scenario="${sc.id}" type="button">
+              <div class="scenario-level">${sc.level}</div>
+              <div class="scenario-name">${sc.name}</div>
+            </button>
+          `;
+        }).join("");
+
+        const sc = SCENARIOS.find(s => s.id === state.m3.scenario) || SCENARIOS[0];
+        const badgeEl = document.getElementById("flowStateBadge");
+        badgeEl.textContent = sc.badge;
+        badgeEl.className = `badge ${sc.badgeClass}`;
+
+        document.getElementById("flowSvgContainer").innerHTML = renderFlowSvg(sc);
+
+        const sensorLabels = [
+          { key: "wifi", title: "無線網路 (CSI/BLE)" },
+          { key: "radar", title: "60GHz mmWave 雷達" },
+          { key: "thermal", title: "VOx Thermal 熱陣列" },
+          { key: "camera", title: "RGB / Starlight 相機" }
+        ];
+
+        document.getElementById("sensorStatesGrid").innerHTML = sensorLabels.map(s => {
+          const d = sc.sensors[s.key];
+          return `
+            <div class="sensor-state-card">
+              <div class="sensor-state-head">
+                <strong style="font-size:12.5px;">${s.title}</strong>
+                <span class="badge ${d.cls} mono">${d.state}</span>
+              </div>
+              <div style="font-size:12px;color:var(--text-secondary);min-height:36px;">${d.mode}</div>
+              <div style="margin-top:8px;font-size:11.5px;color:var(--text-muted);">功耗狀態：<strong class="mono" style="color:var(--text-primary);">${d.power}</strong></div>
+            </div>
+          `;
+        }).join("");
+
+        document.getElementById("telemetryMetersCard").innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:14px;">即時頻寬、功耗與延遲遙測儀表</strong>
+            <span class="badge badge-muted mono">表 2.3 &amp; 2.6 基準</span>
+          </div>
+
+          <div class="meter-row">
+            <div class="meter-label-row">
+              <span><strong>對內匯流排頻寬</strong> (Sensor → Edge RAM)</span>
+              <span class="mono" style="font-weight:700;color:var(--accent-indigo);">${sc.busBwLabel}</span>
+            </div>
+            <div class="meter-bar-track">
+              <div class="meter-bar-fill" style="width:${sc.busPct}%;background:var(--accent-indigo);"></div>
+            </div>
+            <div style="font-size:11.5px;color:var(--text-muted);">${sc.busBwNote}</div>
+          </div>
+
+          <div class="meter-row">
+            <div class="meter-label-row">
+              <span><strong>對外上行頻寬</strong> (Uplink / Backhaul)</span>
+              <span class="mono" style="font-weight:700;color:var(--accent-emerald);">${sc.uplinkBwLabel}</span>
+            </div>
+            <div class="meter-bar-track">
+              <div class="meter-bar-fill" style="width:${sc.uplinkPct}%;background:${sc.id === "L3" ? "var(--accent-rose)" : "var(--accent-emerald)"};"></div>
+            </div>
+            <div style="font-size:11.5px;color:var(--text-muted);">${sc.uplinkBwNote}</div>
+          </div>
+
+          <div class="meter-row">
+            <div class="meter-label-row">
+              <span><strong>感測＋Edge NPU 增量功耗</strong></span>
+              <span class="mono" style="font-weight:700;color:var(--accent-amber);">${sc.incPowerLabel}</span>
+            </div>
+            <div class="meter-bar-track">
+              <div class="meter-bar-fill" style="width:${sc.incPowerPct}%;background:var(--accent-amber);"></div>
+            </div>
+          </div>
+
+          <div class="meter-row">
+            <div class="meter-label-row">
+              <span><strong>含三頻 Wi-Fi 7 AP 整機總功耗</strong></span>
+              <span class="mono" style="font-weight:700;color:var(--accent-cyan);">${sc.totalPowerLabel}</span>
+            </div>
+            <div class="meter-bar-track">
+              <div class="meter-bar-fill" style="width:${sc.totalPowerPct}%;background:var(--accent-cyan);"></div>
+            </div>
+            <div style="font-size:11.5px;color:var(--text-muted);">${sc.totalPowerNote}</div>
+          </div>
+        `;
+
+        const stageNames = ["Stage 0 RF 觸發", "Stage 1 L1 物理", "Stage 2 視覺熱喚醒", "Stage 3 NPU 推論", "Stage 4 加密傳輸"];
+        document.getElementById("retentionPolicyCard").innerHTML = `
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <strong style="font-size:14px;">端對端延遲表現與資料留存策略</strong>
+              <span class="badge ${sc.badgeClass} mono">${sc.id}</span>
+            </div>
+            <div style="padding:11px 13px;border-radius:8px;background:var(--bg-inset);border:1px solid var(--border-subtle);margin-bottom:12px;">
+              <div style="font-size:11.5px;color:var(--text-secondary);">端對端延遲表現（目標紅線 &lt; 200–500 ms）</div>
+              <div class="mono" style="font-size:15.5px;font-weight:800;color:var(--accent-cyan);margin:3px 0;">${sc.latencyLabel}</div>
+              <div style="font-size:12px;color:var(--text-secondary);">${sc.latencyNote}</div>
+              <div class="latency-stages">
+                ${stageNames.map((n, idx) => `
+                  <div class="stage-box">
+                    <div style="color:var(--text-muted);font-size:10.5px;">${n}</div>
+                    <div class="mono" style="font-weight:700;color:var(--text-primary);margin-top:2px;">${sc.stageTimings[idx]}</div>
+                  </div>
+                `).join("")}
+              </div>
+            </div>
+            <div style="padding:12px 13px;border-radius:8px;background:var(--bg-inset);border-left:3px solid ${sc.color};">
+              <div style="font-size:12.5px;font-weight:700;color:var(--text-primary);margin-bottom:4px;">${sc.retentionTitle}</div>
+              <div style="font-size:12px;color:var(--text-secondary);">${sc.retentionDesc}</div>
+            </div>
+          </div>
+          <div style="font-size:11.5px;color:var(--text-muted);">
+            工程提示：維持分級熱待機（mmWave LPDS 2 ms + CMOS Fast-AE 25–45 ms + RK3588/QCS6490 4–25 ms）可避免 500 ms–數秒的冷啟動延遲陷阱。
+          </div>
+        `;
+      }
+
+      /* =========================================================================
+       * 6. MODULE 4: DEPLOYMENT & 3-TIER BOM CALCULATOR
+       * ========================================================================= */
+
+      function renderModule4() {
+        const tierObj = BOM_DATA[state.m4.tier];
+        const trackObj = tierObj[state.m4.comp];
+        const isDist = state.m4.deploy === "dist";
+
+        // Update control buttons active state
+        document.querySelectorAll("#deployModeToggle .seg-btn").forEach(b => b.classList.toggle("active", b.dataset.deploy === state.m4.deploy));
+        document.querySelectorAll("#tierToggle .seg-btn").forEach(b => b.classList.toggle("active", b.dataset.tier === state.m4.tier));
+        document.querySelectorAll("#complianceToggle .seg-btn").forEach(b => b.classList.toggle("active", b.dataset.comp === state.m4.comp));
+
+        const midTotal = (trackObj.totalMin + trackObj.totalMax) / 2;
+
+        // Top Summary Strip
+        document.getElementById("bomSummaryStrip").innerHTML = `
+          <div class="bom-stat ${!isDist ? "highlight" : ""}">
+            <div style="font-size:11.5px;color:var(--text-secondary);font-weight:600;">All-in-One 單節點工程 BOM</div>
+            <div class="mono" style="font-size:20px;font-weight:800;margin:4px 0;color:var(--accent-cyan);">${fmtMoney(trackObj.totalMin)} – ${fmtMoney(trackObj.totalMax)}</div>
+            <div style="font-size:11.5px;color:var(--text-muted);">路線：${trackObj.trackLabel}（千/萬片估算）</div>
+          </div>
+          <div class="bom-stat ${isDist ? "highlight" : ""}">
+            <div style="font-size:11.5px;color:var(--text-secondary);font-weight:600;">分散式單空間／單點位攤提參考</div>
+            <div class="mono" style="font-size:20px;font-weight:800;margin:4px 0;color:var(--accent-emerald);">${tierObj.distExample.perUnit}</div>
+            <div style="font-size:11.5px;color:var(--text-muted);">組合總價 ${tierObj.distExample.totalRange}｜再降 25%–40%</div>
+          </div>
+          <div class="bom-stat">
+            <div style="font-size:11.5px;color:var(--text-secondary);font-weight:600;">建議終端定價 (MSRP / 專案價)</div>
+            <div class="mono" style="font-size:19px;font-weight:800;margin:4px 0;">${tierObj.msrp}</div>
+            <div style="font-size:11.5px;color:var(--text-muted);">對比競品降省 30%–45% 施工與重複維護</div>
+          </div>
+          <div class="bom-stat">
+            <div style="font-size:11.5px;color:var(--text-secondary);font-weight:600;">目標硬體毛利率（3年混和 64%–72%）</div>
+            <div class="mono" style="font-size:20px;font-weight:800;margin:4px 0;color:var(--accent-gold);">${tierObj.margin}</div>
+            <div style="font-size:11.5px;color:var(--text-muted);">疊加進階 AI / PdM SaaS 毛利率達 78%–86%</div>
+          </div>
+        `;
+
+        // Left Card: Horizontal BOM Cost Breakdown Chart
+        const maxItemMid = Math.max(...trackObj.items.map(it => (it.min + it.max) / 2));
+        const barsHtml = trackObj.items.map(it => {
+          const mid = (it.min + it.max) / 2;
+          const share = ((mid / midTotal) * 100).toFixed(1);
+          const barW = ((mid / maxItemMid) * 100).toFixed(1);
+          return `
+            <div class="bom-bar-item">
+              <div class="bom-bar-head">
+                <span style="font-weight:600;color:var(--text-primary);">${it.sys}</span>
+                <span class="mono" style="color:var(--text-secondary);">${fmtMoney(it.min)} – ${fmtMoney(it.max)} <strong style="color:var(--text-primary);">(${share}%)</strong></span>
+              </div>
+              <div class="bom-bar-track">
+                <div class="bom-bar-fill" style="width:${barW}%;background:${it.color};"></div>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        const distNums = tierObj.distExample.perUnit.match(/[\d,.]+/g).map(s => Number(s.replace(/,/g, "")));
+        const distMid = (distNums[0] + distNums[1]) / 2;
+        const distBarPct = Math.min(100, Math.max(12, (distMid / midTotal) * 100)).toFixed(1);
+
+        const distBox = `
+          <div style="margin-top:14px;padding:12px 14px;border-radius:8px;background:var(--bg-inset);border:1px solid ${isDist ? "var(--accent-emerald)" : "var(--border-subtle)"};font-size:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;">
+              <strong style="color:var(--accent-emerald);">形態經濟性對比：All-in-One 單點 vs. 分散式單空間攤提</strong>
+              <span class="badge ${isDist ? "badge-emerald" : "badge-muted"} mono">${isDist ? "目前檢視：分散式架構" : "目前檢視：All-in-One"}</span>
+            </div>
+            <div style="margin-bottom:6px;">
+              <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px;">
+                <span>All-in-One 單節點（${trackObj.trackLabel}）</span>
+                <span class="mono" style="font-weight:700;">${fmtMoney(trackObj.totalMin)} – ${fmtMoney(trackObj.totalMax)}</span>
+              </div>
+              <div class="bom-bar-track"><div class="bom-bar-fill" style="width:100%;background:var(--accent-cyan);opacity:${isDist ? 0.55 : 1};"></div></div>
+            </div>
+            <div style="margin-bottom:8px;">
+              <div style="display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:3px;">
+                <span>分散式單房／單點位攤提</span>
+                <span class="mono" style="font-weight:700;color:var(--accent-emerald);">${tierObj.distExample.perUnit}</span>
+              </div>
+              <div class="bom-bar-track"><div class="bom-bar-fill" style="width:${distBarPct}%;background:var(--accent-emerald);opacity:${isDist ? 1 : 0.7};"></div></div>
+            </div>
+            <div style="color:var(--text-primary);font-weight:600;">${tierObj.distExample.label}</div>
+            <div style="color:var(--text-secondary);margin-top:2px;">${tierObj.distExample.note}</div>
+          </div>
+        `;
+
+        document.getElementById("bomChartCard").innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+            <div>
+              <strong style="font-size:14.5px;">分項 BOM 成本構成橫向條形圖</strong>
+              <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">${tierObj.title}</div>
+            </div>
+            <span class="badge badge-cyan mono">${trackObj.trackLabel}</span>
+          </div>
+          <div class="bom-bars">${barsHtml}</div>
+          ${distBox}
+          <div class="callout">${tierObj.callout}</div>
+        `;
+
+        // Right Card: Representative Chipset List
+        document.getElementById("chipListCard").innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;">
+            <strong style="font-size:14.5px;">代表晶片選型與通路報價清單</strong>
+            <span class="badge badge-muted">1–100 pcs vs 量產 BOM</span>
+          </div>
+          <p style="margin:0 0 8px;font-size:12px;color:var(--text-secondary);">${tierObj.targetDesc}</p>
+          <div>
+            ${trackObj.items.map(it => `
+              <div class="chip-spec-item">
+                <div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;">
+                  <strong style="color:var(--text-primary);">${it.sys}</strong>
+                  <span class="mono" style="color:var(--accent-cyan);font-weight:700;">${fmtMoney(it.min)}–${fmtMoney(it.max)}</span>
+                </div>
+                <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">${it.chip}</div>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">市場公開參考報價：<span class="mono">${it.quote}</span></div>
+              </div>
+            `).join("")}
+          </div>
+        `;
+
+        // Deployment 6-Dimension Comparison
+        document.getElementById("deployCompareGrid").innerHTML = DEPLOY_COMPARISON.map(row => `
+          <div class="deploy-dim-card">
+            <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:6px;">${row.dim}</div>
+            <div class="deploy-side ${!isDist ? "focused" : ""}">
+              <strong style="color:var(--accent-cyan);">All-in-One 整合節點：</strong><span style="color:var(--text-secondary);">${row.aio}</span>
+            </div>
+            <div class="deploy-side ${isDist ? "focused" : ""}">
+              <strong style="color:var(--accent-emerald);">分散式多節點協同：</strong><span style="color:var(--text-secondary);">${row.dist}</span>
+            </div>
+          </div>
+        `).join("");
+
+        // ROI Scenarios
+        document.getElementById("roiGrid").innerHTML = ROI_SCENARIOS.map(r => {
+          const isFocus = r.tiers.includes(state.m4.tier);
+          return `
+            <div class="roi-card ${isFocus ? "focused" : ""}">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:6px;">
+                <span class="badge ${isFocus ? "badge-gold" : "badge-muted"}">${r.badge}</span>
+                <span class="mono" style="font-size:13px;font-weight:800;color:var(--accent-emerald);">${r.payback}</span>
+              </div>
+              <div style="font-size:14px;font-weight:700;margin-bottom:6px;">${r.title}</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-bottom:5px;"><strong>投資成本：</strong>${r.cost}</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;"><strong>量化收益：</strong>${r.benefit}</div>
+              <div style="font-size:11.5px;color:var(--text-muted);">${r.subNote}</div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      /* =========================================================================
+       * 7. VIEW NAVIGATION, THEME TOGGLE & EVENT WIRING
+       * ========================================================================= */
+
+      function applyView() {
+        const sections = document.querySelectorAll(".module-section");
+        sections.forEach(sec => {
+          const show = state.view === "all" || sec.id === state.view;
+          sec.classList.toggle("hidden-module", !show);
+        });
+        document.querySelectorAll(".nav-pill").forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.view === state.view);
+        });
+      }
+
+      function applyTheme() {
+        document.documentElement.setAttribute("data-theme", state.theme);
+        const icon = document.getElementById("themeIcon");
+        const label = document.getElementById("themeLabel");
+        if (state.theme === "dark") {
+          icon.textContent = "☀";
+          label.textContent = "切換淺色";
+        } else {
+          icon.textContent = "☾";
+          label.textContent = "切換深色";
+        }
+      }
+
+      function bindEvents() {
+        // Theme
+        document.getElementById("themeToggleBtn").addEventListener("click", () => {
+          state.theme = state.theme === "dark" ? "light" : "dark";
+          applyTheme();
+        });
+
+        // View Navigation Pills
+        document.querySelectorAll(".nav-pill").forEach(btn => {
+          btn.addEventListener("click", () => {
+            state.view = btn.dataset.view;
+            applyView();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+        });
+
+        // Module 1 Toggles (delegation)
+        const m1List = document.getElementById("modalityToggleList");
+        m1List.addEventListener("click", e => {
+          const card = e.target.closest("[data-mod]");
+          if (!card) return;
+          const id = card.dataset.mod;
+          state.m1[id] = !state.m1[id];
+          document.querySelectorAll("#m1Presets .btn-chip").forEach(b => b.classList.remove("active"));
+          renderModule1();
+        });
+        m1List.addEventListener("keydown", e => {
+          if (e.key === "Enter" || e.key === " ") {
+            const card = e.target.closest("[data-mod]");
+            if (card) {
+              e.preventDefault();
+              card.click();
+            }
+          }
+        });
+
+        // Module 1 Presets
+        document.getElementById("m1Presets").addEventListener("click", e => {
+          const btn = e.target.closest("[data-preset]");
+          if (!btn) return;
+          const p = btn.dataset.preset;
+          const map = {
+            all: { wifi: true, camera: true, thermal: true, radar: true },
+            nonvisual: { wifi: true, camera: false, thermal: true, radar: true },
+            dual_opt: { wifi: false, camera: true, thermal: true, radar: false },
+            wifi_cam: { wifi: true, camera: true, thermal: false, radar: false },
+            wifi_radar: { wifi: true, camera: false, thermal: false, radar: true },
+            none: { wifi: false, camera: false, thermal: false, radar: false }
+          };
+          if (map[p]) {
+            state.m1 = Object.assign({}, map[p]);
+            document.querySelectorAll("#m1Presets .btn-chip").forEach(b => b.classList.toggle("active", b === btn));
+            renderModule1();
+          }
+        });
+
+        // Module 2 Filters & Sort & Inspector & Accordion
+        document.getElementById("domainFilters").addEventListener("click", e => {
+          const btn = e.target.closest("[data-domain]");
+          if (!btn) return;
+          state.m2.domain = btn.dataset.domain;
+          document.querySelectorAll("#domainFilters .btn-chip").forEach(b => b.classList.toggle("active", b === btn));
+          renderModule2();
+        });
+
+        document.getElementById("appSortSelect").addEventListener("change", e => {
+          state.m2.sort = e.target.value;
+          renderModule2();
+        });
+
+        document.getElementById("appsTableBody").addEventListener("click", e => {
+          const row = e.target.closest("[data-code]");
+          if (!row) return;
+          state.m2.selectedCode = row.dataset.code;
+          if (TOP5_DETAILS.some(t => t.code === row.dataset.code)) {
+            state.m2.expandedTop5.add(row.dataset.code);
+          }
+          renderModule2();
+        });
+
+        document.getElementById("top5List").addEventListener("click", e => {
+          const trigger = e.target.closest(".flagship-trigger");
+          if (!trigger) return;
+          const card = trigger.closest("[data-top5]");
+          if (!card) return;
+          const code = card.dataset.top5;
+          if (state.m2.expandedTop5.has(code)) state.m2.expandedTop5.delete(code);
+          else state.m2.expandedTop5.add(code);
+          renderModule2();
+        });
+
+        document.getElementById("expandAllTop5Btn").addEventListener("click", () => {
+          TOP5_DETAILS.forEach(t => state.m2.expandedTop5.add(t.code));
+          renderModule2();
+        });
+
+        document.getElementById("collapseAllTop5Btn").addEventListener("click", () => {
+          state.m2.expandedTop5.clear();
+          renderModule2();
+        });
+
+        // Module 3 Scenario Switcher
+        document.getElementById("scenarioTabs").addEventListener("click", e => {
+          const btn = e.target.closest("[data-scenario]");
+          if (!btn) return;
+          state.m3.scenario = btn.dataset.scenario;
+          renderModule3();
+        });
+
+        // Module 4 Controls
+        document.getElementById("deployModeToggle").addEventListener("click", e => {
+          const btn = e.target.closest("[data-deploy]");
+          if (!btn) return;
+          state.m4.deploy = btn.dataset.deploy;
+          renderModule4();
+        });
+
+        document.getElementById("tierToggle").addEventListener("click", e => {
+          const btn = e.target.closest("[data-tier]");
+          if (!btn) return;
+          state.m4.tier = btn.dataset.tier;
+          renderModule4();
+        });
+
+        document.getElementById("complianceToggle").addEventListener("click", e => {
+          const btn = e.target.closest("[data-comp]");
+          if (!btn) return;
+          state.m4.comp = btn.dataset.comp;
+          renderModule4();
+        });
+      }
+
+      // Boot
+      applyTheme();
+      applyView();
+      renderModule1();
+      renderModule2();
+      renderModule3();
+      renderModule4();
+      bindEvents();
+    })();
+  </script>
+</body>
+</html>
